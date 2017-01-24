@@ -3,7 +3,7 @@
 
 #include <boost/asio.hpp>
 
-#include <regex>
+#include <boost/regex.hpp>
 #include <unordered_map>
 #include <thread>
 
@@ -20,7 +20,7 @@ struct Request {
 
 class WebServer {
 public:
-    unordered_map<string, unordered_map<string, function<void(ostream&, const Request&, const smatch&)> > > resources;
+    unordered_map<string, unordered_map<string, function<void(ostream&, const Request&, const boost::smatch&)> > > resources;
     
     WebServer(unsigned short, size_t);
     

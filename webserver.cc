@@ -81,9 +81,9 @@ void WebServer::process_request_and_respond(shared_ptr<ip::tcp::socket> socket) 
 Request WebServer::parse_request(istream& stream) {
     Request request;
 
-    regex e("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
+    boost::regex e("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
 
-    smatch sm;
+    boost::smatch sm;
 
     //First parse request method, path, and HTTP-version from the first line
     string line;
@@ -114,8 +114,8 @@ Request WebServer::parse_request(istream& stream) {
 void WebServer::respond(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request) {
     //Find path- and method-match, and generate response
     for(auto& res: resources) {
-        regex e(res.first);
-        smatch sm_res;
+        boost::regex e(res.first);
+        boost::smatch sm_res;
         if(regex_match(request->path, sm_res, e)) {
             if(res.second.count(request->method)>0) {
                 shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);

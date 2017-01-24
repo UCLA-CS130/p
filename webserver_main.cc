@@ -14,7 +14,7 @@ int main() {
     
     //Add resources using regular expression for path, a method-string, and an anonymous function
     //POST-example for the path /string, responds the posted string
-    webserver.resources["^/string/?$"]["POST"]=[](ostream& response, const Request& request, const smatch& path_match) {
+    webserver.resources["^/string/?$"]["POST"]=[](ostream& response, const Request& request, const boost::smatch& path_match) {
         //Retrieve string from istream (*request.content)
         stringstream ss;
         *request.content >> ss.rdbuf();
@@ -31,7 +31,7 @@ int main() {
     //  "lastName": "Smith",
     //  "age": 25
     //}
-    webserver.resources["^/json/?$"]["POST"]=[](ostream& response, const Request& request, const smatch& path_match) {
+    webserver.resources["^/json/?$"]["POST"]=[](ostream& response, const Request& request, const boost::smatch& path_match) {
         try {
             ptree pt;
             read_json(*request.content, pt);
@@ -47,7 +47,7 @@ int main() {
     
     //GET-example for the path /
     //Responds with request-information
-    webserver.resources["^/$"]["GET"]=[](ostream& response, const Request& request, const smatch& path_match) {
+    webserver.resources["^/$"]["GET"]=[](ostream& response, const Request& request, const boost::smatch& path_match) {
         stringstream content_stream;
         content_stream << "<h1>Request:</h1>";
         content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "<br>";
@@ -63,7 +63,7 @@ int main() {
     
     //GET-example for the path /match/[number], responds with the matched string in path (number)
     //For instance a request GET /match/123 will receive: 123
-    webserver.resources["^/match/([0-9]+)/?$"]["GET"]=[](ostream& response, const Request& request, const smatch& path_match) {
+    webserver.resources["^/match/([0-9]+)/?$"]["GET"]=[](ostream& response, const Request& request, const boost::smatch& path_match) {
         string number=path_match[1];
         response << "HTTP/1.1 200 OK\r\nContent-Length: " << number.length() << "\r\n\r\n" << number;
     };
