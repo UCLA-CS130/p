@@ -49,16 +49,15 @@ int main() {
     //Responds with request-information
     webserver.resources["^/$"]["GET"]=[](ostream& response, const Request& request, const boost::smatch& path_match) {
         stringstream content_stream;
-        content_stream << "<h1>Request:</h1>";
-        content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "<br>";
+        content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "\r\n";
         for(auto& header: request.header) {
-            content_stream << header.first << ": " << header.second << "<br>";
+            content_stream << header.first << ": " << header.second << "\r\n";
         }
         
         //find length of content_stream (length received using content_stream.tellp())
         content_stream.seekp(0, ios::end);
         
-        response <<  "HTTP/1.1 200 OK\r\nContent-Length: " << content_stream.tellp() << "\r\n\r\n" << content_stream.rdbuf();
+        response <<  "HTTP/1.1 200 OK\r\nContent-Length: " << content_stream.tellp() << "\r\nContent-Type: text/plain\r\n\r\n" << content_stream.rdbuf();
     };
     
     //GET-example for the path /match/[number], responds with the matched string in path (number)
