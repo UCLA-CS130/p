@@ -3,8 +3,8 @@
 WebServer::WebServer(unsigned short port, size_t num_threads=1) : endpoint(ip::tcp::v4(), port), 
     acceptor(m_io_service, endpoint), num_threads(num_threads) {}
 
-void WebServer::start() {
-    accept();
+void WebServer::run() {
+    do_accept();
 
     //If num_threads>1, start m_io_service.run() in (num_threads-1) threads for thread-pooling
     for(size_t c=1;c<num_threads;c++) {
@@ -22,14 +22,14 @@ void WebServer::start() {
     }
 }
 
-void WebServer::accept() {
+void WebServer::do_accept() {
     //Create new socket for this connection
     //Shared_ptr is used to pass temporary objects to the asynchronous functions
     shared_ptr<ip::tcp::socket> socket(new ip::tcp::socket(m_io_service));
 
     acceptor.async_accept(*socket, [this, socket](const boost::system::error_code& ec) {
         //Immediately start accepting a new connection
-        accept();
+        do_accept();
 
         if(!ec) {
             process_request_and_respond(socket);
@@ -60,19 +60,19 @@ void WebServer::process_request_and_respond(shared_ptr<ip::tcp::socket> socket) 
             size_t num_additional_bytes=total-bytes_transferred;
 
             //If content, read that as well
-            if(request->header.count("Content-Length")>0) {
-                async_read(*socket, *read_buffer, transfer_exactly(stoull(request->header["Content-Length"])-num_additional_bytes), 
+            if(request->headers.count("Content-Length")>0) {
+                async_read(*socket, *read_buffer, transfer_exactly(stoull(request->headers["Content-Length"])-num_additional_bytes), 
                 [this, socket, read_buffer, request](const boost::system::error_code& ec, size_t bytes_transferred) {
                     if(!ec) {
                         //Store pointer to read_buffer as istream object
                         request->content=shared_ptr<istream>(new istream(read_buffer.get()));
 
-                        respond(socket, request);
+                        do_reply(socket, request);
                     }
                 });
             }
             else {                   
-                respond(socket, request);
+                do_reply(socket, request);
             }
         }
     });
@@ -102,7 +102,7 @@ Request WebServer::parse_request(istream& stream) {
             line.pop_back();
             matched=regex_match(line, sm, e);
             if(matched) {
-                request.header[sm[1]]=sm[2];
+                request.headers[sm[1]]=sm[2];
             }
 
         } while(matched==true);
@@ -111,7 +111,7 @@ Request WebServer::parse_request(istream& stream) {
     return request;
 }
 
-void WebServer::respond(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request) {
+void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request) {
     //Find path- and method-match, and generate response
     for(auto& res: resources) {
         boost::regex e(res.first);

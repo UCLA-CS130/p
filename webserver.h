@@ -2,8 +2,8 @@
 #define	WEBSERVER_H
 
 #include <boost/asio.hpp>
-
 #include <boost/regex.hpp>
+
 #include <unordered_map>
 #include <thread>
 
@@ -15,7 +15,7 @@ struct Request {
     
     shared_ptr<istream> content;
     
-    unordered_map<string, string> header;
+    unordered_map<string, string> headers;
 };
 
 class WebServer {
@@ -24,7 +24,7 @@ public:
     
     WebServer(unsigned short, size_t);
     
-    void start();
+    void run();
             
 private:
     io_service m_io_service;
@@ -33,13 +33,13 @@ private:
     size_t num_threads;
     vector<thread> threads;
 
-    void accept();
+    void do_accept();
     
     void process_request_and_respond(shared_ptr<ip::tcp::socket> socket);
     
     Request parse_request(istream& stream);
     
-    void respond(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request);
+    void do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request);
 };
 
 #endif	/* WEBSERVER_H */
