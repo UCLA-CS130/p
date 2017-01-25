@@ -1,4 +1,6 @@
 #include "webserver.h"
+#include "config_parser.h"
+#include <stdlib.h>
 
 //Added for the json-example:
 #include <boost/property_tree/ptree.hpp>
@@ -8,9 +10,16 @@ using namespace std;
 //Added for the json-example:
 using namespace boost::property_tree;
 
-int main() {
-    //HTTP-server at port 8080 using 4 threads
-    WebServer webserver(8080, 4);
+int main(int argc, char* argv[]) {
+    //Use NginxConfigParser class to parse config file to get the port number
+    NginxConfigParser parser_;
+    NginxConfig out_config_;
+    parser_.Parse(argv[1], &out_config_);
+    string port = out_config_.statements_[0]->child_block_->statements_[0]->tokens_[1];
+    unsigned short port_num = (unsigned short) atoi(port.c_str());
+
+    //HTTP-server at port specified in config file using 4 threads
+    WebServer webserver(port_num, 4);
     
     //Add resources using regular expression for path, a method-string, and an anonymous function
     //POST-example for the path /string, responds the posted string
