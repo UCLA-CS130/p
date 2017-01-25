@@ -1,6 +1,7 @@
 #include "webserver.h"
 #include "config_parser.h"
 #include <stdlib.h>
+#include <map>
 
 using namespace std;
 
@@ -19,10 +20,12 @@ int main(int argc, char* argv[]) {
     //Responds with request-information
     webserver.resources["^/$"]["GET"]=[](ostream& response, const Request& request, const boost::smatch& path_match) {
         stringstream content_stream;
-        content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "<br>";
-        for(auto& header: request.headers) {
-            content_stream << header.first << ": " << header.second << "<br>";
+        content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "\r\n";
+        map<string, string> ordered(request.headers.begin(), request.headers.end());
+        for(auto& header: ordered) {
+            content_stream << header.first << ": " << header.second << "\r\n";
         }
+        content_stream << "\r\n";
         
         //find length of content_stream (length received using content_stream.tellp())
         content_stream.seekp(0, ios::end);
