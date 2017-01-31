@@ -89,6 +89,7 @@ Request WebServer::parse_request(istream& stream) {
     string line;
     getline(stream, line);
     line.pop_back();
+    //cout << line <<" 92"<<endl;
     if(regex_match(line, sm, e)) {        
         request.method=sm[1];
         request.path=sm[2];
@@ -108,6 +109,9 @@ Request WebServer::parse_request(istream& stream) {
         } while(matched==true);
     }
 
+    //cout<<"method "<<request.method<<endl;
+    //cout<<"path "<<request.path<<endl;
+    //cout<<"http_version "<<request.http_version<<endl;
     return request;
 }
 
