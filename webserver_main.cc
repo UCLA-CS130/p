@@ -22,8 +22,8 @@ int main(int argc, char* argv[]) {
         stringstream content_stream;
         content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "\r\n";
         map<string, string> ordered(request.headers.begin(), request.headers.end());
-        for(auto& header: ordered) {
-            content_stream << header.first << ": " << header.second << "\r\n";
+        for(auto rit=ordered.rbegin(); rit!=ordered.rend(); ++rit) {
+            content_stream << rit->first << ": " << rit->second << "\r\n";
         }
         content_stream << "\r\n";
         

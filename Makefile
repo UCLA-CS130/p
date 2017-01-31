@@ -20,7 +20,10 @@ webserver: config_parser.o webserver.o webserver_main.o
 %.o: %.cc
 	$(CC) $(FLAGS) -c $<
 
+test:
+	python3 integration_test.py 
+
 clean:
 	rm -f *.o *.a webserver config_parser config_parser_test
 
-.PHONY: clean
+.PHONY: clean run all 
