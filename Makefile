@@ -25,10 +25,17 @@ webserver_test: webserver.o
 %.o: %.cc
 	$(CC) $(FLAGS) -c $<
 
-test:
-	python3 integration_test.py 
+test: webserver
+	python3 integration_test.py
+
+unit_test_coverage:
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c ${GTEST_DIR}/src/gtest-all.cc
+	ar -rv libgtest.a gtest-all.o
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ webserver_test.cc webserver.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o webserver_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
+	./webserver_test
+	gcov -r webserver.cc
 
 clean:
-	rm -f *.o *.a *.gcno webserver webserver_test config_parser config_parser_test
+	rm -f *.o *.a *.gcno *.gcov *.gcda webserver webserver_test config_parser config_parser_test
 
 .PHONY: clean run all 
