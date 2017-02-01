@@ -26,7 +26,7 @@ public:
     
     void run();
             
-private:
+//private:
     io_service m_io_service;
     ip::tcp::endpoint endpoint;
     ip::tcp::acceptor acceptor;
@@ -37,7 +37,7 @@ private:
     
     void process_request_and_respond(shared_ptr<ip::tcp::socket> socket);
     
-    Request parse_request(istream& stream);
+    static Request parse_request(istream& stream);
     
     void do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request);
 };
