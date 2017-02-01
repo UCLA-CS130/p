@@ -4,4 +4,4 @@ addons:
   apt:
     packages:
       - libboost-all-dev
-      - python3
+      - python3.5
