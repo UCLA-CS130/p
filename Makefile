@@ -25,7 +25,7 @@ webserver_test: webserver.o
 %.o: %.cc
 	$(CC) $(FLAGS) -c $<
 
-test:
+test: webserver
 	python3 integration_test.py 
 
 clean:
