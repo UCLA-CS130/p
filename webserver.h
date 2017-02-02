@@ -25,8 +25,10 @@ public:
     WebServer(unsigned short, size_t);
     
     void run();
+
+static Request parse_request(istream& stream);
             
-//private:
+private:
     io_service m_io_service;
     ip::tcp::endpoint endpoint;
     ip::tcp::acceptor acceptor;
@@ -35,9 +37,7 @@ public:
 
     void do_accept();
     
-    void process_request_and_respond(shared_ptr<ip::tcp::socket> socket);
-    
-    static Request parse_request(istream& stream);
+    void process_request(shared_ptr<ip::tcp::socket> socket);
     
     void do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request);
 };

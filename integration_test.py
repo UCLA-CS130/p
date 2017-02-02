@@ -17,6 +17,6 @@ if (response != expected):
 	webserver.kill()
 	exit(1)
 else:
-	print('SUCCESS')
+	print('SUCCESS!')
 	webserver.kill()
 	exit(0)

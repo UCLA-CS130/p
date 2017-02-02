@@ -32,12 +32,12 @@ void WebServer::do_accept() {
         do_accept();
 
         if(!ec) {
-            process_request_and_respond(socket);
+            process_request(socket);
         }
     });
 }
 
-void WebServer::process_request_and_respond(shared_ptr<ip::tcp::socket> socket) {
+void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
     //Create new read_buffer for async_read_until()
     //Shared_ptr is used to pass temporary objects to the asynchronous functions
     shared_ptr<boost::asio::streambuf> read_buffer(new boost::asio::streambuf);
@@ -89,7 +89,7 @@ Request WebServer::parse_request(istream& stream) {
     string line;
     getline(stream, line);
     line.pop_back();
-    //cout << line <<" 92"<<endl;
+
     if(regex_match(line, sm, e)) {        
         request.method=sm[1];
         request.path=sm[2];
@@ -109,9 +109,6 @@ Request WebServer::parse_request(istream& stream) {
         } while(matched==true);
     }
 
-    //cout<<"method "<<request.method<<endl;
-    //cout<<"path "<<request.path<<endl;
-    //cout<<"http_version "<<request.http_version<<endl;
     return request;
 }
 
@@ -130,7 +127,7 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request>
                 async_write(*socket, *write_buffer, [this, socket, request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
                     //HTTP persistent connection (HTTP 1.1):
                     if(!ec && stof(request->http_version)>1.05)
-                        process_request_and_respond(socket);
+                        process_request(socket);
                 });
                 return;
             }
