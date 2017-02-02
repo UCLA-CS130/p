@@ -38,4 +38,4 @@ unit_test_coverage:
 clean:
 	rm -f *.o *.a *.gcno *.gcov *.gcda webserver webserver_test config_parser config_parser_test
 
-.PHONY: clean run all test unit_test_coverage
+.PHONY: clean run all integration_test unit_test_coverage
