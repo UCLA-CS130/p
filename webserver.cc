@@ -1,25 +1,25 @@
 #include "webserver.h"
 
-WebServer::WebServer(unsigned short port, size_t num_threads=1) : endpoint(ip::tcp::v4(), port), 
-    acceptor(m_io_service, endpoint), num_threads(num_threads) {}
+WebServer::WebServer(unsigned short port, size_t num_threads=1) 
+: endpoint(ip::tcp::v4(), port), 
+    acceptor(m_io_service, endpoint), num_threads(num_threads)
+     {
+
+     }
 
 void WebServer::run() {
     do_accept();
 
     //If num_threads>1, start m_io_service.run() in (num_threads-1) threads for thread-pooling
     for(size_t c=1;c<num_threads;c++) {
-        threads.emplace_back([this](){
-            m_io_service.run();
-        });
+        threads.emplace_back([this](){ m_io_service.run();});
     }
 
     //Main thread
     m_io_service.run();
 
     //Wait for the rest of the threads, if any, to finish as well
-    for(thread& t: threads) {
-        t.join();
-    }
+    for(thread& t: threads) { t.join();}
 }
 
 void WebServer::do_accept() {
@@ -31,9 +31,7 @@ void WebServer::do_accept() {
         //Immediately start accepting a new connection
         do_accept();
 
-        if(!ec) {
-            process_request(socket);
-        }
+        if(!ec) { process_request(socket); }
     });
 }
 
@@ -71,9 +69,7 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
                     }
                 });
             }
-            else {                   
-                do_reply(socket, request);
-            }
+            else { do_reply(socket, request);}
         }
     });
 }

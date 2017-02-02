@@ -25,7 +25,7 @@ webserver_test: webserver.o
 %.o: %.cc
 	$(CC) $(FLAGS) -c $<
 
-test: webserver
+integration_test: webserver
 	python3 integration_test.py
 
 unit_test_coverage:
