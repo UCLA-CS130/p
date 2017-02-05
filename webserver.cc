@@ -20,7 +20,7 @@ void WebServer::run() {
     m_io_service.run();
 
     //Wait for the rest of the threads, if any, to finish as well
-    for(thread& t: threads) { t.join();}
+    for(thread& t: threads) { t.join(); }
 }
 
 void WebServer::do_accept() {
@@ -122,18 +122,20 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request>
     //         }
     //     }
     // }
-    boost::regex e("^/$");
-    boost::smatch sm_res;
-    if(regex_match(request->path, sm_res, e)) {
-        shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
-        ostream response(write_buffer.get());
-        echo_handler->get_response(response, *request, sm_res);
-        //Capture write_buffer in lambda so it is not destroyed before async_write is finished
-        async_write(*socket, *write_buffer, [this, socket, request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
-            //HTTP persistent connection (HTTP 1.1):
-            if(!ec && stof(request->http_version)>1.05)
-                process_request(socket);
-        });
-        return;
+    cout << "do do_reply" << endl;
+    shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
+    ostream response(write_buffer.get());
+    if (find(echo_handler->paths->begin(), echo_handler->paths->end(), request->path) != echo_handler->paths->end()) {
+        echo_handler->get_response(response, *request);
     }
+    else {
+        static_handler->get_response(response, *request);
+    }
+    //Capture write_buffer in lambda so it is not destroyed before async_write is finished
+    async_write(*socket, *write_buffer, [this, socket, request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
+        //HTTP persistent connection (HTTP 1.1):
+        if(!ec && stof(request->http_version)>1.05)
+            process_request(socket);
+    });
+    return;
 }

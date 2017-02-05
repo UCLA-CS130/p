@@ -1,14 +1,13 @@
 #ifndef request_handler_echo_h
 #define request_handler_echo_h
 
-#include "request.h"
 #include "request_handler.h"
 
-class RequestHandlerEcho : RequestHandler {
+class RequestHandlerEcho : public RequestHandler {
 public:
     RequestHandlerEcho (shared_ptr<vector<string>> paths) : RequestHandler(paths) {}
 
-    void get_response(ostream& response, const Request& request, const boost::smatch& path_match) {
+    void get_response(ostream& response, const Request& request) {
         stringstream content_stream;
         content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "\r\n";
         map<string, string> ordered(request.headers.begin(), request.headers.end());
