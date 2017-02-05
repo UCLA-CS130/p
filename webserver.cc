@@ -122,10 +122,9 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request>
     //         }
     //     }
     // }
-    cout << "do do_reply" << endl;
     shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
     ostream response(write_buffer.get());
-    if (find(echo_handler->paths->begin(), echo_handler->paths->end(), request->path) != echo_handler->paths->end()) {
+    if (echo_handler->paths->find(request->path) != echo_handler->paths->end()) {
         echo_handler->get_response(response, *request);
     }
     else {

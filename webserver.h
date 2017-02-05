@@ -5,7 +5,6 @@
 #include <boost/regex.hpp>
 
 #include <thread>
-#include <iostream>
 
 #include "request.h"
 #include "request_handler.h"
