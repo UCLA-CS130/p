@@ -3,3 +3,4 @@
 *.a
 webserver
 *.dSYM
+.DS_Store

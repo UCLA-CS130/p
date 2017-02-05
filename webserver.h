@@ -4,25 +4,19 @@
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>
 
-#include <unordered_map>
 #include <thread>
+
+#include "request.h"
+#include "request_handler.h"
+#include "request_handler_echo.h"
+#include "request_handler_static.h"
 
 using namespace std;
 using namespace boost::asio;
 
-struct Request {
-    string method, path, http_version;
-    
-    shared_ptr<istream> content;
-    
-    unordered_map<string, string> headers;
-};
-
 class WebServer {
 public:
-    unordered_map<string, unordered_map<string, function<void(ostream&, const Request&, const boost::smatch&)> > > resources;
-    
-    WebServer(unsigned short, size_t);
+    WebServer(unsigned short, shared_ptr<RequestHandlerEcho>, shared_ptr<RequestHandlerStatic>, size_t);
     
     void run();
 
@@ -34,6 +28,9 @@ private:
     ip::tcp::acceptor acceptor;
     size_t num_threads;
     vector<thread> threads;
+
+    shared_ptr<RequestHandlerEcho> echo_handler;
+    shared_ptr<RequestHandlerStatic> static_handler;
 
     void do_accept();
     
