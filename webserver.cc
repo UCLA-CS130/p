@@ -1,11 +1,15 @@
 #include "webserver.h"
 
-WebServer::WebServer(unsigned short port, shared_ptr<RequestHandlerEcho> echo_handler, 
-    shared_ptr<RequestHandlerStatic> static_handler, size_t num_threads=1) 
-    : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads),
-    echo_handler(echo_handler), static_handler(static_handler)
+WebServer::WebServer(unsigned short port, size_t num_threads=1) 
+    : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
     {
+        auto paths1 = make_shared<unordered_set<string>>();
+        paths1->insert("/");
+        echo_handler = make_shared<RequestHandlerEcho>(paths1);
 
+        auto paths2 = make_shared<unordered_map<string, string>>();
+        (*paths2)["static"] = "file/path0";
+        static_handler = make_shared<RequestHandlerStatic>(paths2); 
     }
 
 void WebServer::run() {

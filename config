@@ -1,4 +1,20 @@
 server {
-  listen   8080;
-  server_name team-p;
-}
+    listen        8080;
+
+    location /echo {
+      root /echo; 
+    }
+
+    location /static {
+      root  /file/path0;
+    }
+
+    location /static1 {
+      root  /file/path1;
+    }
+
+    location /static2 {
+      root  /file/path2;
+    }
+
+  }

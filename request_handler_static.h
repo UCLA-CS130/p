@@ -10,9 +10,18 @@ public:
 	RequestHandlerStatic (shared_ptr<unordered_map<string, string>> paths) : paths(paths) {}
     
     void get_response(ostream& response, const Request& request) {
-        cout<<"static"<<endl;
-        string filename="static";      
-        string path=request.path;
+        // string filename="file/path0";      
+        // string path=request.path;
+        // cout<<"line 15"<<endl;
+        string p=request.path.substr(1);
+        size_t position=p.find_first_of("/");
+        string key = p.substr(0, position);
+        cout<<"key is "<<key<<endl;
+        auto find_base_path = paths->find(key);
+        string filename = find_base_path->second;
+        cout<<"base_path is "<<filename<<endl;
+        cout<<"static.h line 16 "<<position<<endl;
+        string path = p.substr(position);
         
         //Remove all but the last '.' (so we can't leave the web-directory)
         size_t last_pos=path.rfind(".");

@@ -16,7 +16,7 @@ using namespace boost::asio;
 
 class WebServer {
 public:
-    WebServer(unsigned short, shared_ptr<RequestHandlerEcho>, shared_ptr<RequestHandlerStatic>, size_t);
+    WebServer(unsigned short, size_t);
     
     void run();
 
