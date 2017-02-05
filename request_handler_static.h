@@ -7,9 +7,9 @@ class RequestHandlerStatic : public RequestHandler {
 public:
 	RequestHandlerStatic (shared_ptr<vector<string>> paths) : RequestHandler(paths) {}
 
-    void get_response(ostream& response, const Request&, const boost::smatch&) {
-        string filename="static/";      
-        string path=path_match[1];
+    void get_response(ostream& response, const Request& request) {
+        string filename="static";      
+        string path=request.path;
         
         //Remove all but the last '.' (so we can't leave the web-directory)
         size_t last_pos=path.rfind(".");
@@ -46,9 +46,8 @@ public:
             string content="Could not open file "+filename;
             response << "HTTP/1.1 400 Bad Request\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
         }
-    };
-    
     }
+    
 };
 
 #endif /* request_handler_static_h */

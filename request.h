@@ -2,6 +2,7 @@
 #define request_h
 
 #include <unordered_map>
+#include <fstream>
 
 struct Request {
     std::string method, path, http_version;
