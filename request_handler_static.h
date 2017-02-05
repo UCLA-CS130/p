@@ -10,6 +10,7 @@ public:
 	RequestHandlerStatic (shared_ptr<unordered_map<string, string>> paths) : paths(paths) {}
     
     void get_response(ostream& response, const Request& request) {
+        cout<<"static"<<endl;
         string filename="static";      
         string path=request.path;
         
