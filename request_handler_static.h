@@ -3,10 +3,12 @@
 
 #include "request_handler.h"
 
+#include <unordered_map>
+
 class RequestHandlerStatic : public RequestHandler {
 public:
-	RequestHandlerStatic (shared_ptr<vector<string>> paths) : RequestHandler(paths) {}
-
+	RequestHandlerStatic (shared_ptr<unordered_map<string, string>> paths) : paths(paths) {}
+    
     void get_response(ostream& response, const Request& request) {
         string filename="static";      
         string path=request.path;
@@ -48,6 +50,8 @@ public:
         }
     }
     
+
+    shared_ptr<unordered_map<string, string>> paths;
 };
 
 #endif /* request_handler_static_h */

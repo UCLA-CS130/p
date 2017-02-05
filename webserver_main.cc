@@ -30,13 +30,12 @@ int main(int argc, char* argv[]) {
         
     //     response <<  "HTTP/1.1 200 OK\r\nContent-Length: " << content_stream.tellp() << "\r\nContent-Type: text/plain\r\n\r\n" << content_stream.rdbuf();
     // };
-    auto paths1 = make_shared<vector<string>>();
-    paths1->push_back("/");
+    auto paths1 = make_shared<unordered_set<string>>();
+    paths1->insert("/");
     auto p1 = make_shared<RequestHandlerEcho>(paths1);
 
-    auto paths2 = make_shared<vector<string>>();
+    auto paths2 = make_shared<unordered_map<string, string>>();
     auto p2 = make_shared<RequestHandlerStatic>(paths2); 
-
     WebServer webserver(port_num, p1, p2, 1);
     
     //Start HTTP-server
