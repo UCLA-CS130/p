@@ -2,6 +2,7 @@
 #include "config_parser.h"
 #include <stdlib.h>
 #include <map>
+#include <iostream>
 
 using namespace std;
 
@@ -9,7 +10,7 @@ int main(int argc, char* argv[]) {
     //Use NginxConfigParser class to parse config file to get the port number
     NginxConfigParser parser_;
     NginxConfig out_config_;
-    parser_.Parse(argv[1], &out_config_);
+    parser_.Parse(argv[1], &out_config_); 
     string port = out_config_.statements_[0]->child_block_->statements_[0]->tokens_[1];
     unsigned short port_num = (unsigned short) atoi(port.c_str());
 
@@ -29,11 +30,15 @@ int main(int argc, char* argv[]) {
         
     //     response <<  "HTTP/1.1 200 OK\r\nContent-Length: " << content_stream.tellp() << "\r\nContent-Type: text/plain\r\n\r\n" << content_stream.rdbuf();
     // };
-    shared_ptr<vector<string>> paths;
-    auto p1 = make_shared<RequestHandlerEcho>(paths);
-    auto p2 = make_shared<RequestHandlerStatic>(paths);
-    WebServer webserver(port_num, p1, p2, 1);
+    auto paths1 = make_shared<vector<string>>();
+    paths1->push_back("/");
+    auto p1 = make_shared<RequestHandlerEcho>(paths1);
 
+    auto paths2 = make_shared<vector<string>>();
+    auto p2 = make_shared<RequestHandlerStatic>(paths2); 
+
+    WebServer webserver(port_num, p1, p2, 1);
+    
     //Start HTTP-server
     webserver.run();
     

@@ -13,9 +13,8 @@ class RequestHandler {
 public:
     RequestHandler(shared_ptr<vector<string>> paths): paths(paths) {}
     
-    virtual void get_response(ostream& response, const Request&, const boost::smatch&) = 0;
+    virtual void get_response(ostream& response, const Request&) = 0;
     
-private:
     shared_ptr<vector<string>> paths;
 };
 
