@@ -10,25 +10,22 @@ public:
 	RequestHandlerStatic (shared_ptr<unordered_map<string, string>> paths) : paths(paths) {}
     
     void get_response(ostream& response, const Request& request) {
-        // string filename="file/path0";      
-        // string path=request.path;
-        // cout<<"line 15"<<endl;
+
         string p=request.path.substr(1);
         size_t position=p.find_first_of("/");
         string key = p.substr(0, position);
-        //cout<<"key is "<<key<<endl;
         auto find_base_path = paths->find(key);
+
+        // if paths not found, return 404
         if(find_base_path == paths->end()){
             string content="Could not find file "+key;
             response << "HTTP/1.1 404 Not Found\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
             return;
         }
         string filename = find_base_path->second;
-        //cout<<"base_path is "<<filename<<endl;
-        //cout<<"static.h line 16 "<<position<<endl;
         string path = p.substr(position);
         
-        //Remove all but the last '.' (so we can't leave the web-directory)
+        // Remove all but the last '.' (so we can't leave the web-directory)
         size_t last_pos=path.rfind(".");
         size_t current_pos=0;
         size_t pos;
@@ -37,8 +34,7 @@ public:
             path.erase(pos, 1);
             last_pos--;
         }
-        cout<<"format is "<<path.substr(last_pos+1)<<endl;
-
+        
         // form content type field
         // only covers common types since this is a simple webserver
         string content_type = "";

@@ -10,7 +10,6 @@ public:
     RequestHandlerEcho (shared_ptr<unordered_set<string>> paths) : paths(paths) {}
 
     void get_response(ostream& response, const Request& request) {
-        cout<<"echo"<<endl;
         stringstream content_stream;
         content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "\r\n";
         map<string, string> ordered(request.headers.begin(), request.headers.end());

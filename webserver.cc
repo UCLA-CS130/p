@@ -3,16 +3,14 @@
 WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=1) 
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
     {
-
+        // initialize echo hadler
         auto paths1 = make_shared<unordered_set<string>>();
-        //paths1->insert("/");
         echo_handler = make_shared<RequestHandlerEcho>(paths1);
         echo_handler->paths->insert("/");
 
+        // initialize static handler
         auto paths2 = make_shared<unordered_map<string, string>>();
-        //(*paths2)["static"] = "file/path0";
         static_handler = make_shared<RequestHandlerStatic>(paths2); 
-        //(*(static_handler->paths))["static"] = "file/path0";
 
         extract(config);
     }
@@ -119,18 +117,7 @@ Request WebServer::parse_request(istream& stream) {
 }
 
 void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request) {
-    // //Find path- and method-match, and generate response
-    // for(auto& res: resources) {
-    //     boost::regex e(res.first);
-    //     boost::smatch sm_res;
-    //     if(regex_match(request->path, sm_res, e)) {
-    //         if(res.second.count(request->method)>0) {
-    //             shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
-    //             ostream response(write_buffer.get());
-    //             res.second[request->method](response, *request, sm_res);
-    //         }
-    //     }
-    // }
+    //Find path- and method-match, and generate response
     shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
     ostream response(write_buffer.get());
     if (echo_handler->paths->find(request->path) != echo_handler->paths->end()) {
@@ -153,7 +140,6 @@ unsigned short extract_port(NginxConfig config) {
   string key = "";
   string value = "";
 
-  //cout<<config.statements_[0]->tokens_[0]<<"config statements size "<<config.statements_.size()<<endl;
   for (size_t i = 0; i < config.statements_.size(); i++) {
     //search in child block
     if (config.statements_[i]->child_block_ != nullptr) {
@@ -169,7 +155,6 @@ unsigned short extract_port(NginxConfig config) {
     }
 
     if (key == "listen" && value != "") {
-      cout << "port number from extract_port is "<<value<<endl;
       return atoi(value.c_str());
     }
   }
@@ -182,30 +167,16 @@ void WebServer::extract(NginxConfig config) {
   string key = "";
   string value = "";
 
-  //cout<<config.statements_[0]->tokens_[0]<<"config statements size "<<config.statements_.size()<<endl;
   for (size_t i = 0; i < config.statements_.size(); i++) {
     //search in child block
     if (config.statements_[i]->child_block_ != nullptr) {
       if(config.statements_[i]->tokens_[0] == "location"){
-        //cout<<"line 190"<<endl;
         extract_location(*(config.statements_[i]->child_block_), config.statements_[i]->tokens_[1]);
       }
       else{
         extract(*(config.statements_[i]->child_block_));
       }
     }
-
-    // if (config.statements_[i]->tokens_.size() >= 1) {
-    //   key = config.statements_[i]->tokens_[0];
-    // }
-
-    // if (config.statements_[i]->tokens_.size() >= 2) {
-    //   value = config.statements_[i]->tokens_[1];
-    // }
-
-    // if (key == "listen" && value != "") {
-    //   //cout << "port number is "<<value<<endl;
-    // }
   }
 }
 
@@ -228,7 +199,6 @@ void WebServer::extract_location(NginxConfig config, string path){
       }
 
       if (key == "root" && value != "") {
-          cout << "base path of "<<path<<" is "<<value<<endl;
           if(path == "echo"){
             echo_handler->paths->insert(value);
           }
