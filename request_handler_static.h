@@ -37,6 +37,41 @@ public:
             path.erase(pos, 1);
             last_pos--;
         }
+        cout<<"format is "<<path.substr(last_pos+1)<<endl;
+
+        // form content type field
+        // only covers common types since this is a simple webserver
+        string content_type = "";
+        string type = path.substr(last_pos+1);
+
+        // image
+        if(type == "jpg" || type == "jpeg" || type == "png" || type == "gif"){
+            content_type += "image/";
+            content_type += type;
+        }
+        // text
+        else if(type == "html" || type == "css" || type == "txt"){
+            content_type += "text/";
+            if(type == "txt"){
+                content_type += "plain";
+            }
+            else{
+                content_type += type;
+            }
+        }
+        // audio
+        else if(type == "mp3" || type == "wma" || type == "wav"){
+            content_type += "audio";
+        }
+        // video
+        else if(type == "mp4" || type == "mov" || type == "wmv"){
+            content_type += "video";
+        }
+        // application
+        else if(type == "pdf" || type == "xml" || type == "zip"){
+            content_type += "application/";
+            content_type += type;
+        }
         
         filename+=path;
         ifstream ifs;
@@ -54,7 +89,7 @@ public:
             ifs.seekg(0, ios::beg);
 
             //The file-content is copied to the response-stream. Should not be used for very large files.
-            response << "HTTP/1.1 200 OK\r\nContent-Length: " << length << "\r\n\r\n" << ifs.rdbuf();
+            response << "HTTP/1.1 200 OK\r\nContent-Length: " << length <<"\r\nContent-Type: "<<content_type<<"\r\n\r\n" << ifs.rdbuf();
 
             ifs.close();
         }
