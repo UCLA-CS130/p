@@ -1,15 +1,20 @@
 #include "webserver.h"
 
-WebServer::WebServer(unsigned short port, size_t num_threads=1) 
+WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=1) 
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
     {
+
         auto paths1 = make_shared<unordered_set<string>>();
-        paths1->insert("/");
+        //paths1->insert("/");
         echo_handler = make_shared<RequestHandlerEcho>(paths1);
+        echo_handler->paths->insert("/");
 
         auto paths2 = make_shared<unordered_map<string, string>>();
-        (*paths2)["static"] = "file/path0";
+        //(*paths2)["static"] = "file/path0";
         static_handler = make_shared<RequestHandlerStatic>(paths2); 
+        //(*(static_handler->paths))["static"] = "file/path0";
+
+        extract(config);
     }
 
 void WebServer::run() {
@@ -141,4 +146,95 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request>
             process_request(socket);
     });
     return;
+}
+
+unsigned short extract_port(NginxConfig config) {
+  // Initialize variables
+  string key = "";
+  string value = "";
+
+  //cout<<config.statements_[0]->tokens_[0]<<"config statements size "<<config.statements_.size()<<endl;
+  for (size_t i = 0; i < config.statements_.size(); i++) {
+    //search in child block
+    if (config.statements_[i]->child_block_ != nullptr) {
+        extract_port(*(config.statements_[i]->child_block_));
+    }
+
+    if (config.statements_[i]->tokens_.size() >= 1) {
+      key = config.statements_[i]->tokens_[0];
+    }
+
+    if (config.statements_[i]->tokens_.size() >= 2) {
+      value = config.statements_[i]->tokens_[1];
+    }
+
+    if (key == "listen" && value != "") {
+      cout << "port number from extract_port is "<<value<<endl;
+      return atoi(value.c_str());
+    }
+  }
+
+  return 8080;
+}
+
+void WebServer::extract(NginxConfig config) {
+  // Initialize variables
+  string key = "";
+  string value = "";
+
+  //cout<<config.statements_[0]->tokens_[0]<<"config statements size "<<config.statements_.size()<<endl;
+  for (size_t i = 0; i < config.statements_.size(); i++) {
+    //search in child block
+    if (config.statements_[i]->child_block_ != nullptr) {
+      if(config.statements_[i]->tokens_[0] == "location"){
+        //cout<<"line 190"<<endl;
+        extract_location(*(config.statements_[i]->child_block_), config.statements_[i]->tokens_[1]);
+      }
+      else{
+        extract(*(config.statements_[i]->child_block_));
+      }
+    }
+
+    // if (config.statements_[i]->tokens_.size() >= 1) {
+    //   key = config.statements_[i]->tokens_[0];
+    // }
+
+    // if (config.statements_[i]->tokens_.size() >= 2) {
+    //   value = config.statements_[i]->tokens_[1];
+    // }
+
+    // if (key == "listen" && value != "") {
+    //   //cout << "port number is "<<value<<endl;
+    // }
+  }
+}
+
+void WebServer::extract_location(NginxConfig config, string path){
+    // Initialize variables
+    string key = "";
+    string value = "";
+
+    for (size_t i=0; i < config.statements_.size(); i++){
+      if (config.statements_[i]->child_block_ != nullptr) {
+            extract_location(*(config.statements_[i]->child_block_), path);
+      }
+
+      if (config.statements_[i]->tokens_.size() >= 1) {
+          key = config.statements_[i]->tokens_[0];
+      }
+
+      if (config.statements_[i]->tokens_.size() >= 2) {
+          value = config.statements_[i]->tokens_[1];
+      }
+
+      if (key == "root" && value != "") {
+          cout << "base path of "<<path<<" is "<<value<<endl;
+          if(path == "echo"){
+            echo_handler->paths->insert(value);
+          }
+          else{
+            (*(static_handler->paths))[path] = value;
+          }
+      }
+    }
 }

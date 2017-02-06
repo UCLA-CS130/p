@@ -1,20 +1,20 @@
 server {
     listen        8080;
 
-    location /echo {
+    location echo {
       root /echo; 
     }
 
-    location /static {
-      root  /file/path0;
+    location static {
+      root  file/path0;
     }
 
-    location /static1 {
-      root  /file/path1;
+    location static1 {
+      root  file/path1;
     }
 
-    location /static2 {
-      root  /file/path2;
+    location static2 {
+      root  file/path2;
     }
 
   }

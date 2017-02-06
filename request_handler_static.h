@@ -16,11 +16,16 @@ public:
         string p=request.path.substr(1);
         size_t position=p.find_first_of("/");
         string key = p.substr(0, position);
-        cout<<"key is "<<key<<endl;
+        //cout<<"key is "<<key<<endl;
         auto find_base_path = paths->find(key);
+        if(find_base_path == paths->end()){
+            string content="Could not find file "+key;
+            response << "HTTP/1.1 404 Not Found\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
+            return;
+        }
         string filename = find_base_path->second;
-        cout<<"base_path is "<<filename<<endl;
-        cout<<"static.h line 16 "<<position<<endl;
+        //cout<<"base_path is "<<filename<<endl;
+        //cout<<"static.h line 16 "<<position<<endl;
         string path = p.substr(position);
         
         //Remove all but the last '.' (so we can't leave the web-directory)
@@ -54,8 +59,8 @@ public:
             ifs.close();
         }
         else {
-            string content="Could not open file "+filename;
-            response << "HTTP/1.1 400 Bad Request\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
+            string content="Could not find file "+filename;
+            response << "HTTP/1.1 404 Not Found\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
         }
     }
     

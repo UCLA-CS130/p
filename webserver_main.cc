@@ -1,5 +1,4 @@
 #include "webserver.h"
-#include "config_parser.h"
 #include <stdlib.h>
 #include <map>
 #include <iostream>
@@ -11,8 +10,9 @@ int main(int argc, char* argv[]) {
     NginxConfigParser parser_;
     NginxConfig config;
     parser_.Parse(argv[1], &config); 
-    string port = config.statements_[0]->child_block_->statements_[0]->tokens_[1];
-    unsigned short port_num = (unsigned short) atoi(port.c_str());
+    unsigned short port = extract_port(config);
+    //string port = config.statements_[0]->child_block_->statements_[0]->tokens_[1];
+    //unsigned short port_num = (unsigned short) atoi(port.c_str());
 
   //   string property = "";
   //   string value = "";11
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     // auto paths2 = make_shared<unordered_map<string, string>>();
     // (*paths2)["static"] = "file/path0";
     // auto p2 = make_shared<RequestHandlerStatic>(paths2); 
-    WebServer webserver(port_num, 1);
+    WebServer webserver(config, port, 1);
     
     //Start HTTP-server
     webserver.run();

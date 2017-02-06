@@ -10,13 +10,14 @@
 #include "request_handler.h"
 #include "request_handler_echo.h"
 #include "request_handler_static.h"
+#include "config_parser.h"
 
 using namespace std;
 using namespace boost::asio;
 
 class WebServer {
 public:
-    WebServer(unsigned short, size_t);
+    WebServer(NginxConfig config, unsigned short port, size_t);
     
     void run();
 
@@ -37,6 +38,12 @@ private:
     void process_request(shared_ptr<ip::tcp::socket> socket);
     
     void do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request);
+
+    void extract(NginxConfig config);
+
+    void extract_location(NginxConfig config, string path);
 };
+
+unsigned short extract_port(NginxConfig config);
 
 #endif	/* WEBSERVER_H */
