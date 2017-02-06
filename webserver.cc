@@ -135,7 +135,7 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request>
     return;
 }
 
-unsigned short extract_port(NginxConfig config) {
+void extract_port(NginxConfig config, unsigned short &port) {
   // Initialize variables
   string key = "";
   string value = "";
@@ -143,7 +143,7 @@ unsigned short extract_port(NginxConfig config) {
   for (size_t i = 0; i < config.statements_.size(); i++) {
     //search in child block
     if (config.statements_[i]->child_block_ != nullptr) {
-        extract_port(*(config.statements_[i]->child_block_));
+        extract_port(*(config.statements_[i]->child_block_), port);
     }
 
     if (config.statements_[i]->tokens_.size() >= 1) {
@@ -155,11 +155,9 @@ unsigned short extract_port(NginxConfig config) {
     }
 
     if (key == "listen" && value != "") {
-      return atoi(value.c_str());
+      port = atoi(value.c_str());
     }
   }
-
-  return 8080;
 }
 
 void WebServer::extract(NginxConfig config) {

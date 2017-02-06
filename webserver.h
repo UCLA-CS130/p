@@ -44,6 +44,6 @@ private:
     void extract_location(NginxConfig config, string path);
 };
 
-unsigned short extract_port(NginxConfig config);
+void extract_port(NginxConfig config, unsigned short& port);
 
 #endif	/* WEBSERVER_H */

@@ -9,10 +9,29 @@ TEST(NginxConfigTest, SimpleConfig0) {
   EXPECT_EQ(1,1);
 }
 
-TEST(WebserverTest, ParseRequest){
-	// auto p1 = make_shared<RequestHandlerEcho>(nullptr);
-	// auto p2 = make_shared<RequestHandlerStatic>(nullptr); 
-	WebServer server(8080, nullptr, nullptr, 4);
+class WebserverTest : public ::testing::Test {
+protected:
+	bool ParseFile(const char* file_name){
+		return parser_.Parse(file_name, &config);
+	}
+	bool ParseString(const std::string config_string) {
+		std::stringstream config_stream(config_string);
+		return parser_.Parse(&config_stream, &config);
+	}
+	NginxConfigParser parser_;
+	NginxConfig config;
+};
+
+TEST_F(WebserverTest, ExtractPort){
+	ParseString("server \n { listen 40833; \n server_name foo.com; }");
+	unsigned short port = 8080;
+	extract_port(config, port);
+	EXPECT_EQ(40833, port);
+}
+
+TEST_F(WebserverTest, ParseRequest){
+    ParseFile("config");  
+	WebServer server(config, 8080, 4);
 	istringstream s("GET /team-:p HTTP/1.1\r\nHost: www.team-:p.org\r\n\r\n");
 	Request req = server.parse_request(s);
 	EXPECT_EQ(req.method, "GET");
