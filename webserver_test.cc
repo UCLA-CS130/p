@@ -40,7 +40,7 @@ TEST_F(WebserverTest, ParseRequest){
 	EXPECT_EQ(req.headers["Host"], "www.team-:p.org");
 }
 
-TEST(RequestHandlerEcho, GetResponse) {
+TEST(RequestHandlerEchoTest, GetResponse) {
 	istringstream is("GET / HTTP/1.1\r\nHost: www.team-:p.org\r\n\r\n");
 	Request req = WebServer::parse_request(is);
 	auto paths = make_shared<unordered_set<string>>();
@@ -53,6 +53,70 @@ TEST(RequestHandlerEcho, GetResponse) {
 }
 
 
-// TEST(RequestHandlerStatic, GetResponse) {
-	
-// }
+class RequestHandlerStaticTest : public ::testing::Test {
+protected:
+	void Response(istringstream& is){
+		Request req = WebServer::parse_request(is);
+		auto paths = make_shared<unordered_map<string, string>>();
+		RequestHandlerStatic handler(paths);
+		(*(handler.paths))["static"] = "file/path0";	
+	    ostream response(&buf);
+    	handler.get_response(response, req);
+	}
+
+	boost::asio::streambuf buf;
+};
+
+TEST_F(RequestHandlerStaticTest, GetResponse) {
+	istringstream is("GET /static/image0.jpg HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+    EXPECT_EQ(28025, buf.size());
+}
+
+TEST_F(RequestHandlerStaticTest, RootPath){
+	istringstream is("GET /static HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+	EXPECT_EQ(247, buf.size());
+}
+
+TEST_F(RequestHandlerStaticTest, HtmlFile){
+	istringstream is("GET /static/test.html HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+	EXPECT_EQ(228, buf.size());
+}
+
+TEST_F(RequestHandlerStaticTest, TxtFile){
+	istringstream is("GET /static/test.txt HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+	EXPECT_EQ(81, buf.size());
+}
+
+TEST_F(RequestHandlerStaticTest, AudioFile){
+	istringstream is("GET /static/chengdu.mp3 HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+	EXPECT_EQ(8668257, buf.size());
+}
+
+TEST_F(RequestHandlerStaticTest, PdfFile){
+	istringstream is("GET /static/hw2.pdf HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+	EXPECT_EQ(94460, buf.size());
+}
+
+TEST_F(RequestHandlerStaticTest, 404NotFound){
+	istringstream is("GET /static/superbowl.mov HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+	EXPECT_EQ(90, buf.size());
+}
+
+TEST_F(RequestHandlerStaticTest, NoStaticMapping){
+	istringstream is("GET /static5/superbowl.mov HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+	EXPECT_EQ(87, buf.size());
+}
+
+TEST_F(RequestHandlerStaticTest, FindLastDot){
+	istringstream is("GET /static/superbowl.2017.mov HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+	Response(is);
+	EXPECT_EQ(94, buf.size());
+}
