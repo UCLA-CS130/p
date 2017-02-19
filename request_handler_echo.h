@@ -9,7 +9,7 @@ class RequestHandlerEcho : public RequestHandler {
 public:
     RequestHandlerEcho (shared_ptr<unordered_set<string>> paths) : paths(paths) {}
 
-    void get_response(ostream& response, const Request& request);
+    void get_response(string& response, const Request& request);
 
     shared_ptr<unordered_set<string>> paths;
 };

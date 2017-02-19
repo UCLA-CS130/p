@@ -9,7 +9,7 @@ class RequestHandlerStatic : public RequestHandler {
 public:
 	RequestHandlerStatic (shared_ptr<unordered_map<string, string>> paths) : paths(paths) {}
     
-    void get_response(ostream& response, const Request& request);
+    void get_response(string& response, const Request& request);
 
     shared_ptr<unordered_map<string, string>> paths;
 };
