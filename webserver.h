@@ -35,7 +35,7 @@ private:
     
     void process_request(shared_ptr<ip::tcp::socket> socket);
     
-    void do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request);
+    void do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Request> &request);
 
     void extract(NginxConfig config);
 

@@ -175,7 +175,7 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
             //"After a successful async_read_until operation, the streambuf may contain additional data beyond the delimiter"
             //The chosen solution is to extract lines from the stream directly when parsing the header. What is left of the
             //read_buffer (maybe some bytes of the content) is appended to in the async_read-function below (for retrieving content).
-            // size_t total=read_buffer->size();
+            size_t total=read_buffer->size();
 
             string raw_request((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
             unique_ptr<Request> request = Request::Parse(raw_request);
@@ -195,15 +195,13 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
                 return header.first == "Content-Length"; 
             } );
             if(it != headers.end()) {
-                async_read(*socket, *read_buffer, transfer_exactly(stoull(it.second)-num_additional_bytes), 
-                [this, socket, read_buffer, request](const boost::system::error_code& ec, size_t bytes_transferred) {
+                async_read(*socket, *read_buffer, transfer_exactly(stoull(it->second)-num_additional_bytes), 
+                [this, socket, read_buffer, &request](const boost::system::error_code& ec, size_t bytes_transferred) {
                     if(!ec) {
 
                         string body((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
                         request->setBody(body);
-                        // //Store pointer to read_buffer as istream object
-                        // request->content=shared_ptr<istream>(new istream(read_buffer.get()));
-
+                        
                         do_reply(socket, request);
                     }
                 });
@@ -213,7 +211,7 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
     });
 }
 
-void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request) {
+void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Request> &request) {
     //Find path- and method-match, and generate response
     shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
     //ostream response(write_buffer.get());
@@ -225,7 +223,7 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request>
         static_handler->get_response(response, *request);
     }
     //Capture write_buffer in lambda so it is not destroyed before async_write is finished
-    async_write(*socket, *write_buffer, [this, socket, request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
+    async_write(*socket, *write_buffer, [this, socket, &request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
         //HTTP persistent connection (HTTP 1.1):
         if(!ec && stof(request->http_version)>1.05)
             process_request(socket);
