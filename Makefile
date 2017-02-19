@@ -14,7 +14,7 @@ config_parser_test: config_parser.o
 	ar -rv libgtest.a gtest-all.o
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ config_parser_test.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o config_parser_test
 
-webserver: config_parser.o webserver.o webserver_main.o
+webserver: config_parser.o request.o webserver.o webserver_main.o 
 	$(CC) $(FLAGS) $^ -o webserver -lboost_system -lboost_regex
 
 webserver_test: webserver.o
