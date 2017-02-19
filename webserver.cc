@@ -175,65 +175,37 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
             //"After a successful async_read_until operation, the streambuf may contain additional data beyond the delimiter"
             //The chosen solution is to extract lines from the stream directly when parsing the header. What is left of the
             //read_buffer (maybe some bytes of the content) is appended to in the async_read-function below (for retrieving content).
-            size_t total=read_buffer->size();
+            // size_t total=read_buffer->size();
 
             //Convert to istream to extract string-lines
             istream stream(read_buffer.get());
+            string raw_request((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
+            unique_ptr<Request> request = Request::Parse(raw_request);
 
-            shared_ptr<Request> request(new Request());
-            *request=parse_request(stream);
+            cout << "raw: " << request->raw_request() << endl;
+            cout << "method: " << request->method() << endl;
+            cout << "uri: " << request->uri() << endl;
+            cout << "version: " << request->version() << endl << "headers: ";
+            auto headers = request->headers();
+            for (auto &header : headers)
+                cout << header.first << ": " << header.second << endl;
+            // size_t num_additional_bytes=total-bytes_transferred;
 
-            size_t num_additional_bytes=total-bytes_transferred;
+            // //If content, read that as well
+            // if(request->headers.count("Content-Length")>0) {
+            //     async_read(*socket, *read_buffer, transfer_exactly(stoull(request->headers["Content-Length"])-num_additional_bytes), 
+            //     [this, socket, read_buffer, request](const boost::system::error_code& ec, size_t bytes_transferred) {
+            //         if(!ec) {
+            //             //Store pointer to read_buffer as istream object
+            //             request->content=shared_ptr<istream>(new istream(read_buffer.get()));
 
-            //If content, read that as well
-            if(request->headers.count("Content-Length")>0) {
-                async_read(*socket, *read_buffer, transfer_exactly(stoull(request->headers["Content-Length"])-num_additional_bytes), 
-                [this, socket, read_buffer, request](const boost::system::error_code& ec, size_t bytes_transferred) {
-                    if(!ec) {
-                        //Store pointer to read_buffer as istream object
-                        request->content=shared_ptr<istream>(new istream(read_buffer.get()));
-
-                        do_reply(socket, request);
-                    }
-                });
-            }
-            else { do_reply(socket, request);}
+            //             do_reply(socket, request);
+            //         }
+            //     });
+            // }
+            // else { do_reply(socket, request);}
         }
     });
-}
-
-Request WebServer::parse_request(istream& stream) {
-    Request request;
-
-    boost::regex e("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
-
-    boost::smatch sm;
-
-    //First parse request method, path, and HTTP-version from the first line
-    string line;
-    getline(stream, line);
-    line.pop_back();
-
-    if(regex_match(line, sm, e)) {        
-        request.method=sm[1];
-        request.path=sm[2];
-        request.http_version=sm[3];
-
-        bool matched;
-        e="^([^:]*): ?(.*)$";
-        //Parse the rest of the header
-        do {
-            getline(stream, line);
-            line.pop_back();
-            matched=regex_match(line, sm, e);
-            if(matched) {
-                request.headers[sm[1]]=sm[2];
-            }
-
-        } while(matched==true);
-    }
-
-    return request;
 }
 
 void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request) {
