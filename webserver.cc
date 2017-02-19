@@ -177,8 +177,6 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
             //read_buffer (maybe some bytes of the content) is appended to in the async_read-function below (for retrieving content).
             // size_t total=read_buffer->size();
 
-            //Convert to istream to extract string-lines
-            istream stream(read_buffer.get());
             string raw_request((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
             unique_ptr<Request> request = Request::Parse(raw_request);
 
@@ -189,21 +187,28 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
             auto headers = request->headers();
             for (auto &header : headers)
                 cout << header.first << ": " << header.second << endl;
-            // size_t num_additional_bytes=total-bytes_transferred;
 
-            // //If content, read that as well
-            // if(request->headers.count("Content-Length")>0) {
-            //     async_read(*socket, *read_buffer, transfer_exactly(stoull(request->headers["Content-Length"])-num_additional_bytes), 
-            //     [this, socket, read_buffer, request](const boost::system::error_code& ec, size_t bytes_transferred) {
-            //         if(!ec) {
-            //             //Store pointer to read_buffer as istream object
-            //             request->content=shared_ptr<istream>(new istream(read_buffer.get()));
+            size_t num_additional_bytes=total-bytes_transferred;
 
-            //             do_reply(socket, request);
-            //         }
-            //     });
-            // }
-            // else { do_reply(socket, request);}
+            //If content, read that as well
+            auto it = find_if(headers.begin(), headers.end(), [](const std::pair<string, string>& header) { 
+                return header.first == "Content-Length"; 
+            } );
+            if(it != headers.end()) {
+                async_read(*socket, *read_buffer, transfer_exactly(stoull(it.second)-num_additional_bytes), 
+                [this, socket, read_buffer, request](const boost::system::error_code& ec, size_t bytes_transferred) {
+                    if(!ec) {
+
+                        string body((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
+                        request->setBody(body);
+                        // //Store pointer to read_buffer as istream object
+                        // request->content=shared_ptr<istream>(new istream(read_buffer.get()));
+
+                        do_reply(socket, request);
+                    }
+                });
+            }
+            else { do_reply(socket, request);}
         }
     });
 }

@@ -20,8 +20,6 @@ public:
     WebServer(NginxConfig config, unsigned short port, size_t);
     
     void run();
-
-static Request parse_request(istream& stream);
             
 private:
     io_service m_io_service;
