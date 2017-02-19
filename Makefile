@@ -14,7 +14,7 @@ config_parser_test: config_parser.o
 	ar -rv libgtest.a gtest-all.o
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ config_parser_test.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o config_parser_test
 
-webserver: config_parser.o webserver.o webserver_main.o
+webserver: config_parser.o webserver.o webserver_main.o response.o
 	$(CC) $(FLAGS) $^ -o webserver -lboost_system -lboost_regex
 
 webserver_test: webserver.o
@@ -31,7 +31,7 @@ integration_test: webserver
 unit_test_coverage:
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c ${GTEST_DIR}/src/gtest-all.cc
 	ar -rv libgtest.a gtest-all.o
-	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ webserver_test.cc webserver.cc config_parser.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o webserver_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ webserver_test.cc webserver.cc config_parser.cc response.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o webserver_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./webserver_test
 	gcov -r webserver.cc
 

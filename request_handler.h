@@ -9,7 +9,7 @@ class RequestHandler {
 public:
 	RequestHandler() {}
 	
-    virtual void get_response(ostream& response, const Request&) = 0;
+    virtual void get_response(string& response, const Request&) = 0;
 };
 
 #endif /* request_handler_h */

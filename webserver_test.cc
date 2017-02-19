@@ -1,14 +1,23 @@
 #include "gtest/gtest.h"
 #include "webserver.h"
+#include "response.h"
 #include <iostream>
 #include <string>
 
 using namespace std;
 
+TEST(Response, Response1){
+	Response r;
+	r.SetStatus(Response::ResponseCode::OK);
+	r.AddHeader("Content length", "19");
+	EXPECT_EQ(r.ToString(), "HTTP/1.1 200 OK\r\nContent length: 19\r\n\r\n");
+}
+
 TEST(NginxConfigTest, SimpleConfig0) {
   EXPECT_EQ(1,1);
 }
 
+/*
 class WebserverTest : public ::testing::Test {
 protected:
 	bool ParseFile(const char* file_name){
@@ -120,3 +129,4 @@ TEST_F(RequestHandlerStaticTest, FindLastDot){
 	Response(is);
 	EXPECT_EQ(94, buf.size());
 }
+*/
