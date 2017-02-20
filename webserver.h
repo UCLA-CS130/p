@@ -39,8 +39,6 @@ private:
     void do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Request> &request);
 
     void extract(NginxConfig config);
-
-    void extract_location(NginxConfig config, string path);
 };
 
 void extract_port(NginxConfig config, unsigned short& port);

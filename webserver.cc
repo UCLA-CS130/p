@@ -4,8 +4,6 @@ WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
     {
         extract(config);
-        // prefix2handler["/"] = make_shared<EchoHandler>();
-        // prefix2handler["/foo/bar/"] = make_shared<StaticHandler>();
     }
 
 void WebServer::run() {
@@ -177,33 +175,4 @@ void WebServer::extract(NginxConfig config) {
       }
     }
   }
-}
-
-void WebServer::extract_location(NginxConfig config, string path){
-    // Initialize variables
-    string key = "";
-    string value = "";
-
-    for (size_t i=0; i < config.statements_.size(); i++){
-      if (config.statements_[i]->child_block_ != nullptr) {
-            extract_location(*(config.statements_[i]->child_block_), path);
-      }
-
-      if (config.statements_[i]->tokens_.size() >= 1) {
-          key = config.statements_[i]->tokens_[0];
-      }
-
-      if (config.statements_[i]->tokens_.size() >= 2) {
-          value = config.statements_[i]->tokens_[1];
-      }
-
-      // if (key == "root" && value != "") {
-      //     if(path == "echo"){
-      //       echo_handler->paths->insert(value);
-      //     }
-      //     else{
-      //       (*(static_handler->paths))[path] = value;
-      //     }
-      // }
-    }
 }

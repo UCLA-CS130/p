@@ -40,8 +40,10 @@ unit_test_coverage:
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ echo_handler_test.cc request.cc response.cc echo_handler.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o echo_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./echo_handler_test 
 	# gcov -r echo_handler.cc
-
-	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ webserver_test.cc webserver.cc config_parser.cc response.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o webserver_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ static_handler_test.cc not_found_handler.cc request.cc response.cc static_handler.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o static_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
+	./static_handler_test 
+	# gcov -r static_handler.cc
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ webserver_test.cc webserver.cc config_parser.cc request.cc response.cc echo_handler_test.cc static_handler_test.cc not_found_handler.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o webserver_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./webserver_test
 	# gcov -r webserver.cc
 

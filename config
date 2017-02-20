@@ -1,21 +1,21 @@
-port        8080;
+port 8080;
 
 path / EchoHandler {
-root /echo;
+	root /echo;
 }
 
 path /echo EchoHandler {
-root /echo;
+	root /echo;
 }
 
 path /static StaticHandler {
-root  file/path0;
+	root  file/path0;
 }
 
 path /static1 StaticHandler {
-root  file/path1;
+	root  file/path1;
 }
 
 path /static2 StaticHandler {
-root  file/path2;
+	root  file/path2;
 }

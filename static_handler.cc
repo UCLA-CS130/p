@@ -7,17 +7,15 @@
 using namespace std;
 
 StaticHandler::Status StaticHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
-
-    if (config.statements_[0]->tokens_.size() >= 2) {
-        m_uri_prefix = uri_prefix;
-        m_root = config.statements_[0]->tokens_[1];
+    if (config.statements_[0]->tokens_.size() < 2) {
+    	return Status(1);
     }
+    m_uri_prefix = uri_prefix;
+    m_root = config.statements_[0]->tokens_[1];
     return Status(0);
-
 }
 
 StaticHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response) {
-
     cout<<request.uri()<<endl;
     cout<<m_uri_prefix<<endl;
     string filename = m_root + request.uri().substr(m_uri_prefix.size());
@@ -93,13 +91,6 @@ StaticHandler::Status StaticHandler::HandleRequest(const Request& request, Respo
     }
 
     ifstream ifs;
-    // //A simple platform-independent file-or-directory check do not exist, but this works in most of the cases:
-    // if(filename.find('.')==string::npos) {
-    //     if(filename[filename.length()-1]!='/')
-    //         filename+='/';
-    //     filename+="index.html";
-    //     content_type = "text/html";
-    // }
     ifs.open(filename, ifstream::in);
     if(ifs) {
         ifs.seekg(0, ios::end);
