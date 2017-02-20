@@ -102,20 +102,18 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
         }
         uri = prefix;
     }
-    // cout << "finished" << endl; 
     Response res;
     if (handler) {
         handler->HandleRequest(*request, &res);
     }
     cout << "response: " << res.ToString() << endl;
     response << res.ToString();
+    int version = stoi(request->version());
+    
     // Capture write_buffer in lambda so it is not destroyed before async_write is finished
-    async_write(*socket, *write_buffer, [this, socket, &request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
+    async_write(*socket, *write_buffer, [this, socket, write_buffer, version](const boost::system::error_code& ec, size_t bytes_transferred) {
         //HTTP persistent connection (HTTP 1.1):
-        cout << request->version() << endl;
-        cout << "after write" << endl; 
-        if(!ec && stoi(request->version())>1.05) {
-            cout << "1.5" << endl;
+        if(!ec && version>1.05) {
             process_request(socket);
         }
     });
