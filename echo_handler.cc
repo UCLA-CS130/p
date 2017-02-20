@@ -3,7 +3,6 @@
 using namespace std;
 
 EchoHandler::Status EchoHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
-
 	return Status(0);
 }
 

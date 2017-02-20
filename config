@@ -1,11 +1,11 @@
 server {
     listen        8080;
 
-    location echo {
-      root /echo; 
+    path / EchoHandler {
+      root /echo;
     }
 
-    location static {
+    path /static StaticHandler {
       root  file/path0;
     }
 

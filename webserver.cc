@@ -3,9 +3,9 @@
 WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=1) 
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
     {
-        // extract(config);
-        prefix2handler["/"] = make_shared<EchoHandler>();
-        prefix2handler["/foo/bar/"] = make_shared<StaticHandler>();
+        extract(config);
+        // prefix2handler["/"] = make_shared<EchoHandler>();
+        // prefix2handler["/foo/bar/"] = make_shared<StaticHandler>();
     }
 
 void WebServer::run() {
@@ -93,7 +93,7 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     size_t pos;
     shared_ptr<RequestHandler> handler = nullptr;
     while ((pos = uri.find_last_of("/")) != string::npos) {
-        string prefix = uri.substr(0, pos+1);
+        string prefix = uri.substr(0, pos);
         auto it = prefix2handler.find(prefix);
         if (it != prefix2handler.end())
         {
@@ -153,8 +153,18 @@ void WebServer::extract(NginxConfig config) {
   for (size_t i = 0; i < config.statements_.size(); i++) {
     //search in child block
     if (config.statements_[i]->child_block_ != nullptr) {
-      if(config.statements_[i]->tokens_[0] == "location"){
-        extract_location(*(config.statements_[i]->child_block_), config.statements_[i]->tokens_[1]);
+      if(config.statements_[i]->tokens_[0] == "path"){
+        key = config.statements_[i]->tokens_[1];
+        string handler_type = config.statements_[i]->tokens_[2];
+        if(handler_type == "EchoHandler"){
+          cout<<"key of EchoHandler is "<<key<<endl;
+          prefix2handler[key] = make_shared<EchoHandler>();
+        }
+        else if(handler_type == "StaticHandler"){
+          prefix2handler[key] = make_shared<StaticHandler>();
+          prefix2handler[key]->Init(key, *(config.statements_[i]->child_block_));
+        }
+        //extract_location(*(config.statements_[i]->child_block_), config.statements_[i]->tokens_[1]);
       }
       else{
         extract(*(config.statements_[i]->child_block_));

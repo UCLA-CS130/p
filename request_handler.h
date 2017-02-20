@@ -3,8 +3,9 @@
 
 #include "request.h"
 #include "response.h"
+#include "config_parser.h"
 
-class NginxConfig;
+//class NginxConfig;
 
 class RequestHandler {
 public:
