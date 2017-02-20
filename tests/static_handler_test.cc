@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "static_handler.h"
+#include "../static_handler.h"
 
 class StaticHandlerTest : public ::testing::Test {
 public:

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "echo_handler.h"
+#include "../echo_handler.h"
 
 TEST(EchoHandlerTest, TestAll) {
 	std::string s("GET /team-:p HTTP/1.1\r\nHost: www.team-:p.org\r\n\r\n");

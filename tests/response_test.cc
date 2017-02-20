@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "response.h"
+#include "../response.h"
 
 TEST(ResponseTest, TestAll) {
 	Response res;

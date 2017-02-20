@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "request.h"
+#include "../request.h"
 
 TEST(RequestTest, TestAll) {
 	std::string s("GET /team-:p HTTP/1.1\r\nHost: www.team-:p.org\r\n\r\n");

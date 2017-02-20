@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "webserver.h"
+#include "../webserver.h"
 #include <iostream>
 #include <string>
 
@@ -19,7 +19,7 @@ protected:
 };
 
 TEST_F(WebserverTest, ExtractPort){
-	ParseString("server \n { listen 40833; \n server_name foo.com; }");
+	ParseString("server \n { port 40833; \n server_name foo.com; }");
 	unsigned short port = 8080;
 	extract_port(config, port);
 	EXPECT_EQ(40833, port);
