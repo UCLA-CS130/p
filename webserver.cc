@@ -93,7 +93,14 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     size_t pos;
     shared_ptr<RequestHandler> handler = nullptr;
     while ((pos = uri.find_last_of("/")) != string::npos) {
-        string prefix = uri.substr(0, pos);
+        string prefix;
+        if(uri.size() == 1){
+          prefix = uri.substr(0, pos+1);
+        }
+        else{
+          prefix = uri.substr(0, pos);
+        }
+        //cout<<prefix<<endl;
         auto it = prefix2handler.find(prefix);
         if (it != prefix2handler.end()) {
             handler = prefix2handler[prefix];
