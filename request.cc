@@ -52,5 +52,5 @@ Request::Headers Request::headers() const { return m_headers; }
 
 void Request::setBody(const std::string& body) {
     m_body = body;
-    raw_request += body;
+    m_raw_request += body;
 }

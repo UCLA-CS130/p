@@ -1,6 +1,7 @@
 #ifndef response_h
 #define response_h
 
+#include <string>
 #include <unordered_map>
 
 class Response {
