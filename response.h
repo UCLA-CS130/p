@@ -2,7 +2,7 @@
 #define response_h
 
 #include <string>
-#include <unordered_map>
+#include <vector>
 
 class Response {
 public:
@@ -19,7 +19,7 @@ public:
 
 private:
 	std::string self_response_code;
-	std::unordered_map<std::string, std::string> self_headers;
+	std::vector<std::pair<std::string, std::string>> self_headers;
 	std::string self_body;
 };
 

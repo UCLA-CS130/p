@@ -50,6 +50,8 @@ std::string Request::version() const { return m_version; }
 
 Request::Headers Request::headers() const { return m_headers; }
 
+std::string Request::body() const { return m_body; }
+
 void Request::setBody(const std::string& body) {
     m_body = body;
     m_raw_request += body;

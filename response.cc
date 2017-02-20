@@ -9,7 +9,7 @@ void Response::SetStatus(const ResponseCode response_code)
 
 void Response::AddHeader(const std::string& header_name, const std::string& header_value)
 {
-	self_headers[header_name] = header_value;
+	self_headers.push_back({header_name, header_value});
 }
 
 void Response::SetBody(const std::string& body)
