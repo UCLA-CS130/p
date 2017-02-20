@@ -1,5 +1,6 @@
 #include "static_handler.h"
-#include <iostream>
+#include "not_found_handler.h"
+
 #include <fstream>
 #include <sstream>
 
@@ -12,7 +13,6 @@ RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const 
 RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response) {
 
     string filename = m_root + request.uri().substr(m_uri_prefix.size());
-    cout << filename << endl;
     // string p=request.path.substr(1);
     // size_t position=p.find_first_of("/");
     // string key;
@@ -108,11 +108,9 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
 			response->AddHeader("Content-Type", content_type); 
 		response->SetBody(ss.str());
     }
-    else response = nullptr;
-    // else {
-    //     string content="Could not find file "+filename;
-    //     response << "HTTP/1.1 404 Not Found\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
-    // }
-
+    else {
+    	unique_ptr<NotFoundHandler> not_found(new NotFoundHandler());
+    	not_found->HandleRequest(request, response); 
+    }
 	return Status(0);
 }
