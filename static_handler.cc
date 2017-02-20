@@ -6,12 +6,20 @@
 
 using namespace std;
 
-RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
-	return Status(0);
+StaticHandler::Status StaticHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
+
+    if (config.statements_[0]->tokens_.size() >= 2) {
+        m_uri_prefix = uri_prefix;
+        m_root = config.statements_[0]->tokens_[1];
+    }
+    return Status(0);
+
 }
 
-RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response) {
+StaticHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response) {
 
+    cout<<request.uri()<<endl;
+    cout<<m_uri_prefix<<endl;
     string filename = m_root + request.uri().substr(m_uri_prefix.size());
     // string p=request.path.substr(1);
     // size_t position=p.find_first_of("/");

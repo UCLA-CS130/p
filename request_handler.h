@@ -3,13 +3,15 @@
 
 #include "request.h"
 #include "response.h"
+#include "config_parser.h"
 
-class NginxConfig;
+//class NginxConfig;
 
 class RequestHandler {
 public:
 	enum Status {
-		OK = 0
+		OK = 0, 
+		ILLEGAL_CONFIG = 1
 	};
 
 	virtual Status Init(const std::string& uri_prefix, const NginxConfig& config) = 0;

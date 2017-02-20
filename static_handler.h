@@ -10,7 +10,7 @@ public:
 	Status HandleRequest(const Request& request, Response* response);
 
 private:
-	std::string m_uri_prefix = "/foo/bar/", m_root = "file/path0/";
+	std::string m_uri_prefix, m_root;
 };
 
 #endif /* static_handler_h */
