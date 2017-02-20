@@ -1,23 +1,21 @@
-server {
-    listen        8080;
+port        8080;
 
-    path / EchoHandler {
-      root /echo;
-    }
+path / EchoHandler {
+root /echo;
+}
 
-    path /echo EchoHandler {
-      root /echo;
-    }
+path /echo EchoHandler {
+root /echo;
+}
 
-    path /static StaticHandler {
-      root  file/path0;
-    }
+path /static StaticHandler {
+root  file/path0;
+}
 
-    path /static1 StaticHandler {
-      root  file/path1;
-    }
+path /static1 StaticHandler {
+root  file/path1;
+}
 
-    path /static2 StaticHandler {
-      root  file/path2;
-    }
-  }
+path /static2 StaticHandler {
+root  file/path2;
+}

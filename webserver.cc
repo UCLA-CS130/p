@@ -145,7 +145,7 @@ void extract_port(NginxConfig config, unsigned short &port) {
       value = config.statements_[i]->tokens_[1];
     }
 
-    if (key == "listen" && value != "") {
+    if (key == "port" && value != "") {
       port = atoi(value.c_str());
     }
   }
