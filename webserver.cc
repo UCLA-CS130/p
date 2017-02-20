@@ -95,8 +95,7 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     while ((pos = uri.find_last_of("/")) != string::npos) {
         string prefix = uri.substr(0, pos+1);
         auto it = prefix2handler.find(prefix);
-        if (it != prefix2handler.end())
-        {
+        if (it != prefix2handler.end()) {
             handler = prefix2handler[prefix];
             break;
         }
@@ -109,7 +108,7 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     cout << "response: " << res.ToString() << endl;
     response << res.ToString();
     int version = stoi(request->version());
-    
+
     // Capture write_buffer in lambda so it is not destroyed before async_write is finished
     async_write(*socket, *write_buffer, [this, socket, write_buffer, version](const boost::system::error_code& ec, size_t bytes_transferred) {
         //HTTP persistent connection (HTTP 1.1):
