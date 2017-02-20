@@ -112,6 +112,9 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     if (handler) {
         handler->HandleRequest(*request, &res);
     }
+    else{
+        prefix2handler["default"]->HandleRequest(*request, &res);
+    }
     cout << "response: " << res.ToString() << endl;
     response << res.ToString();
     int version = stoi(request->version());
@@ -171,6 +174,9 @@ void WebServer::extract(NginxConfig config) {
           prefix2handler[key]->Init(key, *(config.statements_[i]->child_block_));
         }
         //extract_location(*(config.statements_[i]->child_block_), config.statements_[i]->tokens_[1]);
+      }
+      else if(config.statements_[i]->tokens_[0] == "default"){
+        prefix2handler["default"] = make_shared<NotFoundHandler>();
       }
       else{
         extract(*(config.statements_[i]->child_block_));
