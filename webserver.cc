@@ -96,13 +96,27 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
     //ostream response(write_buffer.get());
     string response((istreambuf_iterator<char>(write_buffer.get())), istreambuf_iterator<char>());
-    // if (echo_handler->paths->find(request->path) != echo_handler->paths->end()) {
-    //     echo_handler->get_response(response, *request);
-    // }
-    // else {
-    //     static_handler->get_response(response, *request);
-    // }
-    //Capture write_buffer in lambda so it is not destroyed before async_write is finished
+
+    string uri = request->uri();
+    size_t pos;
+    shared_ptr<RequestHandler> handler = nullptr;
+    while ((pos = uri.find_last_of("/")) != string::npos) {
+        string prefix = uri.substr(0, pos+1);
+        auto it = prefix2handler.find(prefix);
+        if (it != prefix2handler.end())
+        {
+            handler = prefix2handler[prefix];
+            break;
+        }
+        uri = prefix;
+    }
+    // cout << "finished" << endl; 
+
+    if (handler) {
+
+    }
+
+    // Capture write_buffer in lambda so it is not destroyed before async_write is finished
     async_write(*socket, *write_buffer, [this, socket, &request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
         //HTTP persistent connection (HTTP 1.1):
         if(!ec && stof(request->version())>1.05)

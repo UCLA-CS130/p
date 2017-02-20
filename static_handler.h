@@ -9,8 +9,6 @@ public:
 
 	Status HandleRequest(const Request& request, Response* response);
 
-    void get_response(std::string& response, const Request& request);
-
 private:
 	std::string m_uri_prefix;
 };

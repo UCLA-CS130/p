@@ -29,8 +29,7 @@ private:
     size_t num_threads;
     vector<thread> threads;
 
-    shared_ptr<EchoHandler> echo_handler;
-    shared_ptr<StaticHandler> static_handler;
+    unordered_map<string, shared_ptr<RequestHandler>> prefix2handler;
 
     void do_accept();
     
