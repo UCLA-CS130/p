@@ -6,11 +6,12 @@
 
 #include <thread>
 
-#include "request.h"
-#include "request_handler.h"
-#include "request_handler_echo.h"
-#include "request_handler_static.h"
 #include "config_parser.h"
+#include "request.h"
+#include "response.h"
+#include "request_handler.h"
+#include "echo_handler.h"
+#include "static_handler.h"
 
 using namespace std;
 using namespace boost::asio;
@@ -28,8 +29,8 @@ private:
     size_t num_threads;
     vector<thread> threads;
 
-    shared_ptr<RequestHandlerEcho> echo_handler;
-    shared_ptr<RequestHandlerStatic> static_handler;
+    shared_ptr<EchoHandler> echo_handler;
+    shared_ptr<StaticHandler> static_handler;
 
     void do_accept();
     
