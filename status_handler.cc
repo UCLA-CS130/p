@@ -7,10 +7,11 @@ StatusHandler::Status StatusHandler::Init(const std::string& uri_prefix, const N
 }
 
 StatusHandler::Status StatusHandler::HandleRequest(const Request& request, Response* response) {
+	statuses = Log::instance()->get_statuses();
 	response->SetStatus(Response::ResponseCode(200));
 	string response_body;
 	response_body = to_string(statuses.size()) + " requests the server has served.\r\n";
-	for(status s:statuses){
+	for(auto s:statuses){
 		response_body += "\r\nRequested URL: ";
 		response_body += s.s_url;
 		response_body += "\r\nResponse code: ";
@@ -28,14 +29,14 @@ StatusHandler::Status StatusHandler::HandleRequest(const Request& request, Respo
 	return Status(0);
 }
 
-StatusHandler::Status StatusHandler::Log(const std::string& url, const std::string& response_code, const std::string& handler, const std::string& url_prefix) {
-	status s;
-	s.s_url = url;
-	s.s_response_code = response_code;
-	s.s_request_handler = handler;
-	s.s_url_prefix = url_prefix;
-	statuses.push_back(s);
-	//cout<<"response_code is "<<response_code<<endl;
-	//cout<<"s.s_response_code is "<<s.s_response_code<<endl;
-	return Status(0);
-}
+// StatusHandler::Status StatusHandler::Log(const std::string& url, const std::string& response_code, const std::string& handler, const std::string& url_prefix) {
+// 	status s;
+// 	s.s_url = url;
+// 	s.s_response_code = response_code;
+// 	s.s_request_handler = handler;
+// 	s.s_url_prefix = url_prefix;
+// 	statuses.push_back(s);
+// 	//cout<<"response_code is "<<response_code<<endl;
+// 	//cout<<"s.s_response_code is "<<s.s_response_code<<endl;
+// 	return Status(0);
+// }

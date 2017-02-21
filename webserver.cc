@@ -1,5 +1,7 @@
 #include "webserver.h"
 
+Log* l = Log::instance();
+
 WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=1) 
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
     {
@@ -114,11 +116,11 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     std::string response_code =  res.ToString().substr(http_version_size, response_code_len);
     if (handler) {
         handler->HandleRequest(*request, &res);
-        prefix2handler["/status"]->Log(request->uri(), res.ToString().substr(http_version_size, response_code_len), prefix2handler_type[prefix], prefix);
+        Log::instance()->set_status(request->uri(), res.ToString().substr(http_version_size, response_code_len), prefix2handler_type[prefix], prefix);
     }
     else{
         prefix2handler["default"]->HandleRequest(*request, &res);
-        prefix2handler["/status"]->Log(request->uri(), res.ToString().substr(http_version_size, response_code_len), "NotFoundHandler", "");
+        Log::instance()->set_status(request->uri(), res.ToString().substr(http_version_size, response_code_len), "NotFoundHandler", "");
     }
     //cout << "response: " <<res.ToString()<< endl;
     response << res.ToString();

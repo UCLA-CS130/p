@@ -6,12 +6,12 @@
 
 class StatusHandler : public RequestHandler {
 private:
-	struct status{
-		std::string s_url;
-		std::string s_response_code;
-		std::string s_request_handler;
-		std::string s_url_prefix;
-	};
+	// struct status{
+	// 	std::string s_url;
+	// 	std::string s_response_code;
+	// 	std::string s_request_handler;
+	// 	std::string s_url_prefix;
+	// };
 
 	std::vector<status> statuses;
 
@@ -20,7 +20,7 @@ public:
 
 	Status HandleRequest(const Request& request, Response* response);
 
-	Status Log(const std::string& url, const std::string& response_code, const std::string& handler, const std::string& url_prefix);
+	//Status Log(const std::string& url, const std::string& response_code, const std::string& handler, const std::string& url_prefix);
 };
 
 #endif /* status_handler_h */

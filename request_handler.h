@@ -2,6 +2,7 @@
 #define request_handler_h
 
 #include "request.h"
+#include "log.h"
 #include "response.h"
 #include "config_parser.h"
 
@@ -19,9 +20,9 @@ public:
 	virtual Status HandleRequest(const Request& request, Response* response) = 0;
 
 	// add this function for status handler
-	virtual Status Log(const std::string& url, const std::string& response_code, const std::string& handler, const std::string& url_prefix){
-		return Status(0);
-	}
+	// virtual Status Log(const std::string& url, const std::string& response_code, const std::string& handler, const std::string& url_prefix){
+	// 	return Status(0);
+	// }
 };
 
 #endif /* request_handler_h */
