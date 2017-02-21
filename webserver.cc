@@ -114,11 +114,11 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     std::string response_code =  res.ToString().substr(http_version_size, response_code_len);
     if (handler) {
         handler->HandleRequest(*request, &res);
-        prefix2handler["/status"]->Log(uri, res.ToString().substr(http_version_size, response_code_len), prefix2handler_type[prefix], prefix);
+        prefix2handler["/status"]->Log(request->uri(), res.ToString().substr(http_version_size, response_code_len), prefix2handler_type[prefix], prefix);
     }
     else{
         prefix2handler["default"]->HandleRequest(*request, &res);
-        prefix2handler["/status"]->Log(uri, res.ToString().substr(http_version_size, response_code_len), "NotFoundHandler", "");
+        prefix2handler["/status"]->Log(request->uri(), res.ToString().substr(http_version_size, response_code_len), "NotFoundHandler", "");
     }
     //cout << "response: " <<res.ToString()<< endl;
     response << res.ToString();
