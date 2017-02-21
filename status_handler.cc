@@ -28,15 +28,3 @@ StatusHandler::Status StatusHandler::HandleRequest(const Request& request, Respo
 	response->SetBody(response_body);
 	return Status(0);
 }
-
-// StatusHandler::Status StatusHandler::Log(const std::string& url, const std::string& response_code, const std::string& handler, const std::string& url_prefix) {
-// 	status s;
-// 	s.s_url = url;
-// 	s.s_response_code = response_code;
-// 	s.s_request_handler = handler;
-// 	s.s_url_prefix = url_prefix;
-// 	statuses.push_back(s);
-// 	//cout<<"response_code is "<<response_code<<endl;
-// 	//cout<<"s.s_response_code is "<<s.s_response_code<<endl;
-// 	return Status(0);
-// }

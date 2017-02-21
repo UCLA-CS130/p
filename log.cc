@@ -16,7 +16,6 @@ void Log::set_status(const std::string& url, const std::string& response_code, c
 	s.s_request_handler = handler;
 	s.s_url_prefix = url_prefix;
 	statuses.push_back(s);
-	//std::cout<<"log.cc line 19!!"<<std::endl;
 }
 
 std::vector<status> Log::get_statuses() const{
