@@ -90,8 +90,9 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     string uri = request->uri();
     size_t pos;
     shared_ptr<RequestHandler> handler = nullptr;
+    string prefix;
     while ((pos = uri.find_last_of("/")) != string::npos) {
-        string prefix;
+        
         if(uri.size() == 1){
           prefix = uri.substr(0, pos+1);
         }
@@ -107,13 +108,19 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
         uri = prefix;
     }
     Response res;
+    const int http_version_size = strlen("HTTP/1.1 ");
+   // cout<<"http_version_size is "<<http_version_size<<endl;
+    const int response_code_len = 3;
+    std::string response_code =  res.ToString().substr(http_version_size, response_code_len);
     if (handler) {
         handler->HandleRequest(*request, &res);
+        prefix2handler["/status"]->Log(uri, res.ToString().substr(http_version_size, response_code_len), prefix2handler_type[prefix], prefix);
     }
     else{
         prefix2handler["default"]->HandleRequest(*request, &res);
+        prefix2handler["/status"]->Log(uri, res.ToString().substr(http_version_size, response_code_len), "NotFoundHandler", "");
     }
-    cout << "response: " << res.ToString() << endl;
+    //cout << "response: " <<res.ToString()<< endl;
     response << res.ToString();
     int version = stoi(request->version());
 
@@ -164,13 +171,17 @@ void WebServer::extract(NginxConfig config) {
         key = config.statements_[i]->tokens_[1];
         string handler_type = config.statements_[i]->tokens_[2];
         if(handler_type == "EchoHandler"){
-          cout<<"key of EchoHandler is "<<key<<endl;
+          //cout<<"key of EchoHandler is "<<key<<endl;
           prefix2handler[key] = make_shared<EchoHandler>();
         }
         else if(handler_type == "StaticHandler"){
           prefix2handler[key] = make_shared<StaticHandler>();
           prefix2handler[key]->Init(key, *(config.statements_[i]->child_block_));
         }
+        else if(handler_type == "StatusHandler"){
+          prefix2handler[key] = make_shared<StatusHandler>();
+        }
+        prefix2handler_type[key] = handler_type;
         //extract_location(*(config.statements_[i]->child_block_), config.statements_[i]->tokens_[1]);
       }
       else if(config.statements_[i]->tokens_[0] == "default"){

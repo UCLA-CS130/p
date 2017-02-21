@@ -14,6 +14,7 @@
 #include "echo_handler.h"
 #include "static_handler.h"
 #include "not_found_handler.h"
+#include "status_handler.h"
 
 using namespace std;
 using namespace boost::asio;
@@ -32,6 +33,7 @@ private:
     vector<thread> threads;
 
     unordered_map<string, shared_ptr<RequestHandler>> prefix2handler;
+    unordered_map<string, string> prefix2handler_type;
 
     void do_accept();
     

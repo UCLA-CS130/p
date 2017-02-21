@@ -3,6 +3,7 @@
 void Response::SetStatus(const ResponseCode response_code)
 {
 	switch(response_code){
+		case NOT_FOUND: self_response_code = "404 NOT FOUND"; break;
 		case OK: default: self_response_code = "200 OK"; break;
 	}
 }
