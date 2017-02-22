@@ -10,4 +10,6 @@ public:
 	Status HandleRequest(const Request& request, Response* response);
 };
 
+REGISTER_REQUEST_HANDLER(NotFoundHandler);
+
 #endif /* not_found_handler_h */
