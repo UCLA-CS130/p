@@ -25,20 +25,19 @@ else:
 
 print('TEST 2: Serving static files')
 print('Sending request...')
-curl_proc = subprocess.Popen(["curl", "-s", "localhost:8080/static/index.html", "-o", "output"])
+curl_proc = subprocess.call(["curl", "-s", "localhost:8080/static/index.html", "-o", "output"])
 
 diff_proc = subprocess.Popen(["diff", "-u", "file/path0/index.html", "output"], stdout=subprocess.PIPE)
 diff = diff_proc.stdout.read().decode('utf-8')
+os.remove('output')
 
 print('Checking response...')
 if diff != "":
 	print('FAILED: Response does not match expected!')
 	print(diff)
-	os.remove("../output")
 	webserver.kill()
 	exit(1)
 else:
 	print('SUCCESS!')
-	os.remove("../output")
 	webserver.kill()
 	exit(0)
