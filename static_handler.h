@@ -13,4 +13,6 @@ private:
 	std::string m_uri_prefix, m_root;
 };
 
+REGISTER_REQUEST_HANDLER(StaticHandler);
+
 #endif /* static_handler_h */

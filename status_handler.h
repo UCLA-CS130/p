@@ -14,4 +14,6 @@ public:
 	Status HandleRequest(const Request& request, Response* response);
 };
 
+REGISTER_REQUEST_HANDLER(StatusHandler);
+
 #endif /* status_handler_h */
