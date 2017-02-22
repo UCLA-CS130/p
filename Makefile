@@ -34,19 +34,22 @@ unit_test_coverage:
 	ar -rv libgtest.a gtest-all.o
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/request_test.cc request.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o request_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./request_test 
-	gcov -r request.cc
+	# gcov -r request.cc
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/response_test.cc response.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o response_test -fprofile-arcs -ftest-coverage
 	./response_test 
-	gcov -r response.cc
+	# gcov -r response.cc
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/echo_handler_test.cc request.cc response.cc echo_handler.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o echo_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./echo_handler_test 
-	gcov -r echo_handler.cc
+	# gcov -r echo_handler.cc
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/static_handler_test.cc not_found_handler.cc request.cc response.cc static_handler.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o static_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./static_handler_test 
-	gcov -r static_handler.cc
+	# gcov -r static_handler.cc 
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/not_found_handler_test.cc not_found_handler.cc request.cc response.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o not_found_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
+	./not_found_handler_test 
+	# gcov -r not_found_handler.cc
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/webserver_test.cc webserver.cc config_parser.cc request.cc response.cc echo_handler.cc static_handler.cc not_found_handler.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o webserver_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./webserver_test
-	gcov -r webserver.cc
+	# gcov -r webserver.cc
 
 clean:
 	rm -rf *.dSYM *.o *.a *.gcno *.gcov *.gcda config_parser webserver *_test

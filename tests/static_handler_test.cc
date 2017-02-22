@@ -59,5 +59,5 @@ TEST_F(StaticHandlerTest, PdfFile) {
 
 TEST_F(StaticHandlerTest, 404NotFound) {
 	Response res = GetResponse("superbowl.mov");
-	EXPECT_EQ("HTTP/1.1 200 OK\r\nContent-Length: 14\r\nContent-Type: text/plain\r\n\r\n404 Not Found.", res.ToString());
+	EXPECT_EQ("HTTP/1.1 404 NOT FOUND\r\nContent-Length: 14\r\nContent-Type: text/plain\r\n\r\n404 Not Found.", res.ToString());
 }
