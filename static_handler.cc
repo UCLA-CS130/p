@@ -16,46 +16,8 @@ StaticHandler::Status StaticHandler::Init(const std::string& uri_prefix, const N
 }
 
 StaticHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response) {
-    cout<<request.uri()<<endl;
-    cout<<m_uri_prefix<<endl;
     string filename = m_root + request.uri().substr(m_uri_prefix.size());
-    // string p=request.path.substr(1);
-    // size_t position=p.find_first_of("/");
-    // string key;
-    // if(position == string::npos){
-    //     key = p;
-    // }
-    // else{
-    //     key = p.substr(0, position);
-    // }
-    // auto find_base_path = paths->find(key);
 
-    // string filename = find_base_path->second;
-
-    // // initialize varibles before goto
-    // string path;
-    // string content_type;
-    // string type;
-    // size_t current_pos=0;
-    // size_t last_pos=0;
-
-    // if(position == string::npos){
-    //     goto index_page;
-    // }
-
-    // path = p.substr(position);
-
-    //     // Remove all but the last '.' (so we can't leave the web-directory)
-    // last_pos=path.rfind(".");
-    // size_t pos;
-    // while((pos=path.find('.', current_pos))!=string::npos && pos!=last_pos) {
-    //     current_pos=pos;
-    //     path.erase(pos, 1);
-    //     last_pos--;
-    // }
-
-    // form content type field
-    // only covers common types since this is a simple webserver
     string content_type, ext;
     size_t pos = filename.find_last_of(".");
     if (pos != string::npos)

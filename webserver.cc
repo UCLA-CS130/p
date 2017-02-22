@@ -2,9 +2,7 @@
 
 WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=1) 
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
-    {
-        extract(config);
-    }
+    { extract(config); }
 
 void WebServer::run() {
     do_accept();
@@ -38,7 +36,6 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
     //Create new read_buffer for async_read_until()
     //Shared_ptr is used to pass temporary objects to the asynchronous functions
     shared_ptr<boost::asio::streambuf> read_buffer(new boost::asio::streambuf);
-    cout << "process_request" << endl;
     async_read_until(*socket, *read_buffer, "\r\n\r\n",
     [this, socket, read_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
         if(!ec) {
@@ -47,19 +44,11 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
             //The chosen solution is to extract lines from the stream directly when parsing the header. What is left of the
             //read_buffer (maybe some bytes of the content) is appended to in the async_read-function below (for retrieving content).
             size_t total=read_buffer->size();
+            size_t num_additional_bytes=total-bytes_transferred;
 
             string raw_request((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
             unique_ptr<Request> request = Request::Parse(raw_request);
-
-            cout << "raw: " << request->raw_request() << endl;
-            // cout << "method: " << request->method() << endl;
-            // cout << "uri: " << request->uri() << endl;
-            // cout << "version: " << request->version() << endl << "headers: ";
             auto headers = request->headers();
-            // for (auto &header : headers)
-            //     cout << header.first << ": " << header.second << endl;
-
-            size_t num_additional_bytes=total-bytes_transferred;
 
             //If content, read that as well
             auto it = find_if(headers.begin(), headers.end(), [](const std::pair<string, string>& header) { 
@@ -83,10 +72,10 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
 }
 
 void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Request> &request) {
-    //Find path- and method-match, and generate response
     shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
     ostream response(write_buffer.get());
 
+    // Use longest prefix matching to map to corresponding request handler
     string uri = request->uri();
     size_t pos;
     shared_ptr<RequestHandler> handler = nullptr;
@@ -99,7 +88,7 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
         else{
           prefix = uri.substr(0, pos);
         }
-        //cout<<prefix<<endl;
+
         auto it = prefix2handler.find(prefix);
         if (it != prefix2handler.end()) {
             handler = prefix2handler[prefix];
@@ -107,9 +96,9 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
         }
         uri = prefix;
     }
+
     Response res;
     const int http_version_size = strlen("HTTP/1.1 ");
-   // cout<<"http_version_size is "<<http_version_size<<endl;
     const int response_code_len = 3;
     std::string response_code =  res.ToString().substr(http_version_size, response_code_len);
     if (handler) {
@@ -120,14 +109,14 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
         prefix2handler["default"]->HandleRequest(*request, &res);
         Log::instance()->set_status(request->uri(), res.ToString().substr(http_version_size, response_code_len), "NotFoundHandler", "");
     }
-    //cout << "response: " <<res.ToString()<< endl;
-    response << res.ToString();
-    int version = stoi(request->version());
 
+    response << res.ToString();
+
+    int version = stoi(request->version());
     // Capture write_buffer in lambda so it is not destroyed before async_write is finished
     async_write(*socket, *write_buffer, [this, socket, write_buffer, version](const boost::system::error_code& ec, size_t bytes_transferred) {
         //HTTP persistent connection (HTTP 1.1):
-        if(!ec && version>1.05) {
+        if(!ec && version>=1.1) {
             process_request(socket);
         }
     });
