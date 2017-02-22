@@ -2,7 +2,7 @@
 #include "../not_found_handler.h"
 
 TEST(NotFoundHandlerTest, TestAll) {
-	auto req = Request::Parse(""); 
+	auto req = Request::Parse("GET /team"); 
 	Response res;
 	std::unique_ptr<NotFoundHandler> handler(new NotFoundHandler());
 	handler->HandleRequest(*req, &res);
