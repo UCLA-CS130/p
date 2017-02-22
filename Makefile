@@ -50,6 +50,9 @@ unit_test_coverage:
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/log_test.cc log.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o log_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./log_test 
 	gcov -r log.cc
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/not_found_handler_test.cc not_found_handler.cc request.cc response.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o not_found_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
+	./not_found_handler_test 
+	gcov -r not_found_handler.cc
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/webserver_test.cc webserver.cc config_parser.cc request.cc response.cc echo_handler.cc static_handler.cc not_found_handler.cc status_handler.cc log.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o webserver_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./webserver_test
 	gcov -r webserver.cc
