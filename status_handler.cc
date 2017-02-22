@@ -24,7 +24,6 @@ StatusHandler::Status StatusHandler::HandleRequest(const Request& request, Respo
 	}
 	response->AddHeader("Content-Length", to_string(response_body.size()));
 	response->AddHeader("Content-Type", "text/plain");
-	//cout<<"response_body is "<<response_body<<endl;
 	response->SetBody(response_body);
 	return Status(0);
 }

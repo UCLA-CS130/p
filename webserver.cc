@@ -98,15 +98,20 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     }
 
     Response res;
+    // Response_code (200, 404, etc) will always appear after "HTTP/1.1 ".
+    // So get the const size of http version and the const length of response_code.
+    // Then, response_code can be obtained from substr of response.ToString() function
+    // and be written to singleton Log class.
     const int http_version_size = strlen("HTTP/1.1 ");
     const int response_code_len = 3;
-    std::string response_code =  res.ToString().substr(http_version_size, response_code_len);
     if (handler) {
         handler->HandleRequest(*request, &res);
+        // Write status information of the server to singleton Log class.
         Log::instance()->set_status(request->uri(), res.ToString().substr(http_version_size, response_code_len), prefix2handler_type[prefix], prefix);
     }
     else{
         prefix2handler["default"]->HandleRequest(*request, &res);
+        // Write status information of the server to singleton Log class.
         Log::instance()->set_status(request->uri(), res.ToString().substr(http_version_size, response_code_len), "NotFoundHandler", "");
     }
 
@@ -156,11 +161,11 @@ void WebServer::extract(NginxConfig config) {
   for (size_t i = 0; i < config.statements_.size(); i++) {
     //search in child block
     if (config.statements_[i]->child_block_ != nullptr) {
+      // create corresponding request handler objects
       if(config.statements_[i]->tokens_[0] == "path"){
         key = config.statements_[i]->tokens_[1];
         string handler_type = config.statements_[i]->tokens_[2];
         if(handler_type == "EchoHandler"){
-          //cout<<"key of EchoHandler is "<<key<<endl;
           prefix2handler[key] = make_shared<EchoHandler>();
         }
         else if(handler_type == "StaticHandler"){
@@ -171,7 +176,6 @@ void WebServer::extract(NginxConfig config) {
           prefix2handler[key] = make_shared<StatusHandler>();
         }
         prefix2handler_type[key] = handler_type;
-        //extract_location(*(config.statements_[i]->child_block_), config.statements_[i]->tokens_[1]);
       }
       else if(config.statements_[i]->tokens_[0] == "default"){
         prefix2handler["default"] = make_shared<NotFoundHandler>();
