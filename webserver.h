@@ -31,7 +31,11 @@ private:
     size_t num_threads;
     vector<thread> threads;
 
+    // map from prefix to handler
     unordered_map<string, shared_ptr<RequestHandler>> prefix2handler;
+
+    // map from prefix to handler_type
+    // used for logging the status of the server, specifically for logging prefix and handler type
     unordered_map<string, string> prefix2handler_type;
 
     void do_accept();

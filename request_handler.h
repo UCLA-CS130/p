@@ -16,9 +16,9 @@ public:
 	};
 	static RequestHandler* CreateByName(const char* type);
 	
-	virtual Status Init(const std::string& uri_prefix, const NginxConfig& config) = 0;
+	virtual Status Init(const std::string& uri_prefix, const NginxConfig& config){ return Status(0); }
 
-	virtual Status HandleRequest(const Request& request, Response* response) = 0;
+	virtual Status HandleRequest(const Request& request, Response* response){ return Status(0); }
 };
 
 extern std::map<std::string, RequestHandler* (*)(void)>* request_handler_builders;

@@ -1,4 +1,5 @@
 #include "webserver.h"
+#include <cstring>
 
 WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=1) 
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
@@ -165,20 +166,25 @@ void WebServer::extract(NginxConfig config) {
       if(config.statements_[i]->tokens_[0] == "path"){
         key = config.statements_[i]->tokens_[1];
         string handler_type = config.statements_[i]->tokens_[2];
-        if(handler_type == "EchoHandler"){
-          prefix2handler[key] = make_shared<EchoHandler>();
-        }
-        else if(handler_type == "StaticHandler"){
-          prefix2handler[key] = make_shared<StaticHandler>();
+
+        // create a request handler pointer by handler_type
+        auto handler = RequestHandler::CreateByName(handler_type.c_str());
+        // and then assign it to the corresponding shared pointer in prefix2handler map
+        prefix2handler[key].reset(handler);
+
+        // only Init() function of StaticHandler needs to be called 
+        if(handler_type == "StaticHandler"){    
           prefix2handler[key]->Init(key, *(config.statements_[i]->child_block_));
         }
-        else if(handler_type == "StatusHandler"){
-          prefix2handler[key] = make_shared<StatusHandler>();
-        }
+
+        // record handler type for logging status of the server
         prefix2handler_type[key] = handler_type;
+
       }
       else if(config.statements_[i]->tokens_[0] == "default"){
-        prefix2handler["default"] = make_shared<NotFoundHandler>();
+        string handler_type = config.statements_[i]->tokens_[1];
+        auto handler = RequestHandler::CreateByName(handler_type.c_str());
+        prefix2handler["default"].reset(handler);
       }
       else{
         extract(*(config.statements_[i]->child_block_));
