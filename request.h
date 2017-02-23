@@ -1,15 +1,32 @@
 #ifndef request_h
 #define request_h
 
-#include <unordered_map>
-#include <fstream>
+#include <string>
+#include <vector>
+#include <memory>
 
-struct Request {
-    std::string method, path, http_version;
-    
-    std::shared_ptr<std::istream> content;
-    
-    std::unordered_map<std::string, std::string> headers;
+class Request {
+public:
+	static std::unique_ptr<Request> Parse(const std::string& raw_request);
+
+	std::string raw_request() const;
+	std::string method() const;
+	std::string uri() const;
+	std::string version() const;
+
+	using Headers = std::vector<std::pair<std::string, std::string>>;
+	Headers headers() const;
+
+	std::string body() const;
+
+	void setBody(const std::string& body);
+
+private:
+	Request(const std::string& raw_request) : m_raw_request(raw_request) {};
+
+	std::string m_raw_request, m_method, m_uri, m_version, m_body;
+
+	Headers m_headers;
 };
 
 #endif /* request_h */

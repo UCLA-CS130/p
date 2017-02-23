@@ -1,139 +1,9 @@
 #include "webserver.h"
-
-void RequestHandlerEcho::get_response(ostream& response, const Request& request) {
-    stringstream content_stream;
-    content_stream << request.method << " " << request.path << " HTTP/" << request.http_version << "\r\n";
-    map<string, string> ordered(request.headers.begin(), request.headers.end());
-    for(auto rit=ordered.rbegin(); rit!=ordered.rend(); ++rit) {
-        content_stream << rit->first << ": " << rit->second << "\r\n";
-    }
-    content_stream << "\r\n";
-
-        //find length of content_stream (length received using content_stream.tellp())
-    content_stream.seekp(0, ios::end);
-
-    response <<  "HTTP/1.1 200 OK\r\nContent-Length: " << content_stream.tellp() << "\r\nContent-Type: text/plain\r\n\r\n" << content_stream.rdbuf();
-}
-
-void RequestHandlerStatic::get_response(ostream& response, const Request& request) {
-
-    string p=request.path.substr(1);
-    size_t position=p.find_first_of("/");
-    string key;
-    if(position == string::npos){
-        key = p;
-    }
-    else{
-        key = p.substr(0, position);
-    }
-    auto find_base_path = paths->find(key);
-
-        // if paths not found, return 404
-    if(find_base_path == paths->end()){
-        string content="Could not find file "+p;
-        response << "HTTP/1.1 404 Not Found\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
-        return;
-    }
-    string filename = find_base_path->second;
-
-    // initialize varibles before goto
-    string path;
-    string content_type;
-    string type;
-    size_t current_pos=0;
-    size_t last_pos=0;
-
-    if(position == string::npos){
-        goto index_page;
-    }
-
-    path = p.substr(position);
-
-        // Remove all but the last '.' (so we can't leave the web-directory)
-    last_pos=path.rfind(".");
-    size_t pos;
-    while((pos=path.find('.', current_pos))!=string::npos && pos!=last_pos) {
-        current_pos=pos;
-        path.erase(pos, 1);
-        last_pos--;
-    }
-
-        // form content type field
-        // only covers common types since this is a simple webserver
-    content_type = "";
-    type = path.substr(last_pos+1);
-
-        // image
-    if(type == "jpg" || type == "jpeg" || type == "png" || type == "gif"){
-        content_type += "image/";
-        content_type += type;
-    }
-        // text
-    else if(type == "html" || type == "css" || type == "txt"){
-        content_type += "text/";
-        if(type == "txt"){
-            content_type += "plain";
-        }
-        else{
-            content_type += type;
-        }
-    }
-        // audio
-    else if(type == "mp3" || type == "wma" || type == "wav"){
-        content_type += "audio";
-    }
-        // video
-    else if(type == "mp4" || type == "mov" || type == "wmv"){
-        content_type += "video";
-    }
-        // application
-    else if(type == "pdf" || type == "xml" || type == "zip"){
-        content_type += "application/";
-        content_type += type;
-    }
-
-    index_page:
-    filename+=path;
-    ifstream ifs;
-        //A simple platform-independent file-or-directory check do not exist, but this works in most of the cases:
-    if(filename.find('.')==string::npos) {
-        if(filename[filename.length()-1]!='/')
-            filename+='/';
-        filename+="index.html";
-        content_type = "text/html";
-    }
-    ifs.open(filename, ifstream::in);
-    if(ifs) {
-        ifs.seekg(0, ios::end);
-        size_t length=ifs.tellg();
-
-        ifs.seekg(0, ios::beg);
-
-            //The file-content is copied to the response-stream. Should not be used for very large files.
-        response << "HTTP/1.1 200 OK\r\nContent-Length: " << length <<"\r\nContent-Type: "<<content_type<<"\r\n\r\n" << ifs.rdbuf();
-
-        ifs.close();
-    }
-    else {
-        string content="Could not find file "+filename;
-        response << "HTTP/1.1 404 Not Found\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
-    }
-}
+#include <cstring>
 
 WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=1) 
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
-    {
-        // initialize echo hadler
-        auto paths1 = make_shared<unordered_set<string>>();
-        echo_handler = make_shared<RequestHandlerEcho>(paths1);
-        echo_handler->paths->insert("/");
-
-        // initialize static handler
-        auto paths2 = make_shared<unordered_map<string, string>>();
-        static_handler = make_shared<RequestHandlerStatic>(paths2); 
-
-        extract(config);
-    }
+    { extract(config); }
 
 void WebServer::run() {
     do_accept();
@@ -167,7 +37,6 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
     //Create new read_buffer for async_read_until()
     //Shared_ptr is used to pass temporary objects to the asynchronous functions
     shared_ptr<boost::asio::streambuf> read_buffer(new boost::asio::streambuf);
-
     async_read_until(*socket, *read_buffer, "\r\n\r\n",
     [this, socket, read_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
         if(!ec) {
@@ -176,81 +45,86 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
             //The chosen solution is to extract lines from the stream directly when parsing the header. What is left of the
             //read_buffer (maybe some bytes of the content) is appended to in the async_read-function below (for retrieving content).
             size_t total=read_buffer->size();
-
-            //Convert to istream to extract string-lines
-            istream stream(read_buffer.get());
-
-            shared_ptr<Request> request(new Request());
-            *request=parse_request(stream);
-
             size_t num_additional_bytes=total-bytes_transferred;
 
+            string raw_request((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
+            unique_ptr<Request> request = Request::Parse(raw_request);
+            auto headers = request->headers();
+
             //If content, read that as well
-            if(request->headers.count("Content-Length")>0) {
-                async_read(*socket, *read_buffer, transfer_exactly(stoull(request->headers["Content-Length"])-num_additional_bytes), 
-                [this, socket, read_buffer, request](const boost::system::error_code& ec, size_t bytes_transferred) {
+            auto it = find_if(headers.begin(), headers.end(), [](const std::pair<string, string>& header) { 
+                return header.first == "Content-Length"; 
+            } );
+            if(it != headers.end()) {
+                async_read(*socket, *read_buffer, transfer_exactly(stoull(it->second)-num_additional_bytes), 
+                [this, socket, read_buffer, &request](const boost::system::error_code& ec, size_t bytes_transferred) {
                     if(!ec) {
-                        //Store pointer to read_buffer as istream object
-                        request->content=shared_ptr<istream>(new istream(read_buffer.get()));
+
+                        string body((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
+                        request->setBody(body);
 
                         do_reply(socket, request);
                     }
                 });
             }
-            else { do_reply(socket, request);}
+            else { do_reply(socket, request); }
         }
     });
 }
 
-Request WebServer::parse_request(istream& stream) {
-    Request request;
-
-    boost::regex e("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
-
-    boost::smatch sm;
-
-    //First parse request method, path, and HTTP-version from the first line
-    string line;
-    getline(stream, line);
-    line.pop_back();
-
-    if(regex_match(line, sm, e)) {        
-        request.method=sm[1];
-        request.path=sm[2];
-        request.http_version=sm[3];
-
-        bool matched;
-        e="^([^:]*): ?(.*)$";
-        //Parse the rest of the header
-        do {
-            getline(stream, line);
-            line.pop_back();
-            matched=regex_match(line, sm, e);
-            if(matched) {
-                request.headers[sm[1]]=sm[2];
-            }
-
-        } while(matched==true);
-    }
-
-    return request;
-}
-
-void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request) {
-    //Find path- and method-match, and generate response
+void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Request> &request) {
     shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
     ostream response(write_buffer.get());
-    if (echo_handler->paths->find(request->path) != echo_handler->paths->end()) {
-        echo_handler->get_response(response, *request);
+
+    // Use longest prefix matching to map to corresponding request handler
+    string uri = request->uri();
+    size_t pos;
+    shared_ptr<RequestHandler> handler = nullptr;
+    string prefix;
+    while ((pos = uri.find_last_of("/")) != string::npos) {
+        
+        if(uri.size() == 1){
+          prefix = uri.substr(0, pos+1);
+        }
+        else{
+          prefix = uri.substr(0, pos);
+        }
+
+        auto it = prefix2handler.find(prefix);
+        if (it != prefix2handler.end()) {
+            handler = prefix2handler[prefix];
+            break;
+        }
+        uri = prefix;
     }
-    else {
-        static_handler->get_response(response, *request);
+
+    Response res;
+    // Response_code (200, 404, etc) will always appear after "HTTP/1.1 ".
+    // So get the const size of http version and the const length of response_code.
+    // Then, response_code can be obtained from substr of response.ToString() function
+    // and be written to singleton Log class.
+    const int http_version_size = strlen("HTTP/1.1 ");
+    const int response_code_len = 3;
+    if (handler) {
+        handler->HandleRequest(*request, &res);
+        // Write status information of the server to singleton Log class.
+        Log::instance()->set_status(request->uri(), res.ToString().substr(http_version_size, response_code_len), prefix2handler_type[prefix], prefix);
     }
-    //Capture write_buffer in lambda so it is not destroyed before async_write is finished
-    async_write(*socket, *write_buffer, [this, socket, request, write_buffer](const boost::system::error_code& ec, size_t bytes_transferred) {
+    else{
+        prefix2handler["default"]->HandleRequest(*request, &res);
+        // Write status information of the server to singleton Log class.
+        Log::instance()->set_status(request->uri(), res.ToString().substr(http_version_size, response_code_len), "NotFoundHandler", "");
+    }
+
+    response << res.ToString();
+
+    int version = stoi(request->version());
+    // Capture write_buffer in lambda so it is not destroyed before async_write is finished
+    async_write(*socket, *write_buffer, [this, socket, write_buffer, version](const boost::system::error_code& ec, size_t bytes_transferred) {
         //HTTP persistent connection (HTTP 1.1):
-        if(!ec && stof(request->http_version)>1.05)
+        if(!ec && version>=1.1) {
             process_request(socket);
+        }
     });
     return;
 }
@@ -274,7 +148,7 @@ void extract_port(NginxConfig config, unsigned short &port) {
       value = config.statements_[i]->tokens_[1];
     }
 
-    if (key == "listen" && value != "") {
+    if (key == "port" && value != "") {
       port = atoi(value.c_str());
     }
   }
@@ -288,41 +162,33 @@ void WebServer::extract(NginxConfig config) {
   for (size_t i = 0; i < config.statements_.size(); i++) {
     //search in child block
     if (config.statements_[i]->child_block_ != nullptr) {
-      if(config.statements_[i]->tokens_[0] == "location"){
-        extract_location(*(config.statements_[i]->child_block_), config.statements_[i]->tokens_[1]);
+      // create corresponding request handler objects
+      if(config.statements_[i]->tokens_[0] == "path"){
+        key = config.statements_[i]->tokens_[1];
+        string handler_type = config.statements_[i]->tokens_[2];
+
+        // create a request handler pointer by handler_type
+        auto handler = RequestHandler::CreateByName(handler_type.c_str());
+        // and then assign it to the corresponding shared pointer in prefix2handler map
+        prefix2handler[key].reset(handler);
+
+        // only Init() function of StaticHandler needs to be called 
+        if(handler_type == "StaticHandler"){    
+          prefix2handler[key]->Init(key, *(config.statements_[i]->child_block_));
+        }
+
+        // record handler type for logging status of the server
+        prefix2handler_type[key] = handler_type;
+
+      }
+      else if(config.statements_[i]->tokens_[0] == "default"){
+        string handler_type = config.statements_[i]->tokens_[1];
+        auto handler = RequestHandler::CreateByName(handler_type.c_str());
+        prefix2handler["default"].reset(handler);
       }
       else{
         extract(*(config.statements_[i]->child_block_));
       }
     }
   }
-}
-
-void WebServer::extract_location(NginxConfig config, string path){
-    // Initialize variables
-    string key = "";
-    string value = "";
-
-    for (size_t i=0; i < config.statements_.size(); i++){
-      if (config.statements_[i]->child_block_ != nullptr) {
-            extract_location(*(config.statements_[i]->child_block_), path);
-      }
-
-      if (config.statements_[i]->tokens_.size() >= 1) {
-          key = config.statements_[i]->tokens_[0];
-      }
-
-      if (config.statements_[i]->tokens_.size() >= 2) {
-          value = config.statements_[i]->tokens_[1];
-      }
-
-      if (key == "root" && value != "") {
-          if(path == "echo"){
-            echo_handler->paths->insert(value);
-          }
-          else{
-            (*(static_handler->paths))[path] = value;
-          }
-      }
-    }
 }

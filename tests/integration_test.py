@@ -1,4 +1,7 @@
 import subprocess
+import os
+
+subprocess.call('cd ..', shell=True)
 
 print('Starting webserver...')
 webserver = subprocess.Popen(['./webserver', 'config'], stdout=subprocess.DEVNULL)
@@ -22,10 +25,11 @@ else:
 
 print('TEST 2: Serving static files')
 print('Sending request...')
-curl_proc = subprocess.Popen(["curl", "-s", "localhost:8080/index.html", "-o", "output"])
+curl_proc = subprocess.call(["curl", "-s", "localhost:8080/static/index.html", "-o", "output"])
 
-diff_proc = subprocess.Popen(["diff", "-u", "static/index.html", "output"], stdout=subprocess.PIPE)
+diff_proc = subprocess.Popen(["diff", "-u", "file/path0/index.html", "output"], stdout=subprocess.PIPE)
 diff = diff_proc.stdout.read().decode('utf-8')
+os.remove('output')
 
 print('Checking response...')
 if diff != "":

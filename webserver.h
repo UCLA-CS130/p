@@ -5,12 +5,15 @@
 #include <boost/regex.hpp>
 
 #include <thread>
+#include <unordered_map>
 
 #include "request.h"
+#include "response.h"
 #include "request_handler.h"
-#include "request_handler_echo.h"
-#include "request_handler_static.h"
-#include "config_parser.h"
+#include "echo_handler.h"
+#include "static_handler.h"
+#include "not_found_handler.h"
+#include "status_handler.h"
 
 using namespace std;
 using namespace boost::asio;
@@ -20,8 +23,6 @@ public:
     WebServer(NginxConfig config, unsigned short port, size_t);
     
     void run();
-
-static Request parse_request(istream& stream);
             
 private:
     io_service m_io_service;
@@ -30,18 +31,20 @@ private:
     size_t num_threads;
     vector<thread> threads;
 
-    shared_ptr<RequestHandlerEcho> echo_handler;
-    shared_ptr<RequestHandlerStatic> static_handler;
+    // map from prefix to handler
+    unordered_map<string, shared_ptr<RequestHandler>> prefix2handler;
+
+    // map from prefix to handler_type
+    // used for logging the status of the server, specifically for logging prefix and handler type
+    unordered_map<string, string> prefix2handler_type;
 
     void do_accept();
     
     void process_request(shared_ptr<ip::tcp::socket> socket);
     
-    void do_reply(shared_ptr<ip::tcp::socket> socket, shared_ptr<Request> request);
+    void do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Request> &request);
 
     void extract(NginxConfig config);
-
-    void extract_location(NginxConfig config, string path);
 };
 
 void extract_port(NginxConfig config, unsigned short& port);
