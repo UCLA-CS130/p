@@ -83,7 +83,7 @@ void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Re
     string prefix;
     while ((pos = uri.find_last_of("/")) != string::npos) {
         
-        if(uri.size() == 1){
+        if(pos == 0){
           prefix = uri.substr(0, pos+1);
         }
         else{
