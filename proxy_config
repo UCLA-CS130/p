@@ -1,0 +1,9 @@
+port 8080;
+
+path / ProxyHandler {
+	host www.ucla.edu;	
+}
+
+default NotFoundHandler {
+	root;
+}
