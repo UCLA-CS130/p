@@ -172,10 +172,7 @@ void WebServer::extract(NginxConfig config) {
         // and then assign it to the corresponding shared pointer in prefix2handler map
         prefix2handler[key].reset(handler);
 
-        // only Init() function of StaticHandler needs to be called 
-        if(handler_type == "StaticHandler"){    
-          prefix2handler[key]->Init(key, *(config.statements_[i]->child_block_));
-        }
+        prefix2handler[key]->Init(key, *(config.statements_[i]->child_block_));
 
         // record handler type for logging status of the server
         prefix2handler_type[key] = handler_type;
