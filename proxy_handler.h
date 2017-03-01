@@ -4,6 +4,8 @@
 #include "request_handler.h"
 #include "http_client.h"
 #include "UriParser.hpp"
+#include <string>
+#include <sstream>
 
 class ProxyHandler : public RequestHandler {
 public:
@@ -24,6 +26,8 @@ public:
 private:
     std::string host_;
     std::string port_ = "80";
+
+    static std::string filter_request_header(const Request& req);
 };
 
 REGISTER_REQUEST_HANDLER(ProxyHandler);

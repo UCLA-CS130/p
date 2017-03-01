@@ -1,6 +1,9 @@
 #include "proxy_handler.h"
 
 const std::string redirect_header_ = "Location";
+const std::string space_ = " ";
+const std::string crlf_ = "\r\n";
+const std::string name_value_separator_ = ": ";
 
 RequestHandler::Status ProxyHandler::Init(const std::string& uri_prefix,
                       const NginxConfig& config)
@@ -29,12 +32,13 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request,
         client.Connect(host_, port_);
 
         // generate http package, http client support http 1.0 only
-        std::string raw_request = request.method() + " " + request.uri() + " " + "HTTP/1.0\r\n";
-        raw_request += "\r\n";
+        std::string raw_request = filter_request_header(request);
         client.SendRequest(raw_request);
         std::cout << "send host request: " << raw_request << "\n";
         auto resp = std::move(client.GetResponse());
         std::cout << "receive host response\n";
+
+        // handle redirect
         while (resp->GetResponseCode() == Response::MOVE_TEMPORARILY) {
             std::string location = "";
             for(auto& header: resp->GetHeaders()) {
@@ -63,6 +67,8 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request,
                 return ILLEGAL_CONFIG;
             }
         }
+
+        // generate response
         response->SetStatus(resp->GetResponseCode());
         for (auto &header: resp->GetHeaders()) {
             response->AddHeader(header.first, header.second);
@@ -73,4 +79,21 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request,
         return ILLEGAL_CONFIG;
     }
     return OK;
+}
+
+// remove unsupported header like cookie, rewrite connection, set http version to 1.0
+std::string ProxyHandler::filter_request_header(const Request& req) {
+    std::stringstream ss;
+    ss << req.method() << space_ << req.uri() << space_ << "HTTP/1.0" << crlf_;
+    for (auto const& header: req.headers()) {
+        if (header.first == "Cookie") continue; // ignore cookie
+        if (header.first == "Connection") {
+            ss << "Connection" << name_value_separator_ << "close" << crlf_;
+            continue;
+        }
+        ss << header.first << name_value_separator_ << header.second << crlf_;
+    }
+    ss << crlf_;
+    ss << req.body();
+    return ss.str();
 }
