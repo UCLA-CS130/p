@@ -6,6 +6,7 @@
 #include "UriParser.hpp"
 #include <string>
 #include <sstream>
+#include <iostream>
 
 class ProxyHandler : public RequestHandler {
 public:
@@ -28,6 +29,7 @@ private:
     std::string port_ = "80";
 
     static std::string filter_request_header(const Request& req);
+    static std::string request_from_url(const std::string url);
 };
 
 REGISTER_REQUEST_HANDLER(ProxyHandler);

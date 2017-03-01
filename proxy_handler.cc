@@ -52,7 +52,9 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request,
                 std::cout << "Redirect: " << location << "\n";
 
                 // parse url to get host, port, path and parameter
-                http::url parsed = http::ParseHttpUrl(location);
+                // copy location because parser will modify it
+                std::string copy(location);
+                http::url parsed = http::ParseHttpUrl(copy);
                 if (parsed.port == 0) {
                     // if location does not specify port, use default 80
                     client.Connect(parsed.host);
@@ -60,14 +62,7 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request,
                     client.Connect(parsed.host, std::to_string(parsed.port));
                 }
 
-                // generate request according to Location
-                raw_request = request.method() + " ";
-                raw_request += parsed.path;
-                if (parsed.search.length() != 0) {
-                    raw_request += "?" + parsed.search;
-                }
-                raw_request += " HTTP/1.0\r\n\r\n";
-                client.SendRequest(raw_request);
+                client.SendRequest(request_from_url(location));
 
                 // get response
                 resp = std::move(client.GetResponse());
@@ -103,5 +98,21 @@ std::string ProxyHandler::filter_request_header(const Request& req) {
     }
     ss << crlf_;
     ss << req.body();
+    return ss.str();
+}
+
+// generate get request without http header
+std::string ProxyHandler::request_from_url(const std::string url) {
+    std::string copy = url;
+    http::url parsed = http::ParseHttpUrl(copy);
+    std::stringstream ss;
+    ss << "GET" << space_ << parsed.path;
+    // include the parameter
+    if (parsed.search.length() != 0) {
+        ss << "?" << parsed.search << space_;
+    }
+    ss << "HTTP/1.0" << crlf_;
+    ss << crlf_;
+    std::cout << ss.str() << "\n";
     return ss.str();
 }
