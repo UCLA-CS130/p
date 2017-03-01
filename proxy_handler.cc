@@ -40,6 +40,7 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request,
 
         // handle redirect
         while (resp->GetResponseCode() == Response::MOVE_TEMPORARILY) {
+            // retrieve Location which is the next url to visit
             std::string location = "";
             for(auto& header: resp->GetHeaders()) {
                 if (header.first == redirect_header_) {
@@ -49,12 +50,17 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request,
             }
             if (location.length() != 0) {
                 std::cout << "Redirect: " << location << "\n";
+
+                // parse url to get host, port, path and parameter
                 http::url parsed = http::ParseHttpUrl(location);
                 if (parsed.port == 0) {
+                    // if location does not specify port, use default 80
                     client.Connect(parsed.host);
                 } else {
                     client.Connect(parsed.host, std::to_string(parsed.port));
                 }
+
+                // generate request according to Location
                 raw_request = request.method() + " ";
                 raw_request += parsed.path;
                 if (parsed.search.length() != 0) {
@@ -62,6 +68,8 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request,
                 }
                 raw_request += " HTTP/1.0\r\n\r\n";
                 client.SendRequest(raw_request);
+
+                // get response
                 resp = std::move(client.GetResponse());
             } else {
                 return ILLEGAL_CONFIG;
