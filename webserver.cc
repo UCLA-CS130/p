@@ -1,7 +1,7 @@
 #include "webserver.h"
 #include <cstring>
 
-WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=1) 
+WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=4) 
     : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
     { extract(config); }
 
