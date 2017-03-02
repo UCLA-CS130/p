@@ -1,5 +1,5 @@
 CC = g++
-FLAGS = -std=c++11 -Wall -Werror -g -pthread
+FLAGS = -std=c++11 -Wall -g -pthread
 GTEST_DIR=googletest/googletest
 TEST_DIR=tests
 
@@ -56,8 +56,15 @@ unit_test_coverage:
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/webserver_test.cc webserver.cc config_parser.cc request.cc response.cc request_handler.cc echo_handler.cc static_handler.cc not_found_handler.cc status_handler.cc log.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o webserver_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
 	./webserver_test
 	gcov -r webserver.cc
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/proxy_handler_test.cc webserver.cc config_parser.cc request.cc response.cc request_handler.cc echo_handler.cc static_handler.cc not_found_handler.cc status_handler.cc log.cc proxy_handler.cc http_client.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o proxy_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
+	./proxy_handler_test
+	gcov -r proxy_handler.cc
 
+proxy_handler_test:
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/proxy_handler_test.cc webserver.cc config_parser.cc request.cc response.cc request_handler.cc echo_handler.cc static_handler.cc not_found_handler.cc status_handler.cc log.cc proxy_handler.cc http_client.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o proxy_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
+	./proxy_handler_test
+	gcov -r proxy_handler.cc
 clean:
 	rm -rf *.dSYM *.o *.a *.gcno *.gcov *.gcda config_parser webserver *_test
 
-.PHONY: clean run all integration_test unit_test_coverage
+.PHONY: clean run all integration_test unit_test_coverage proxy_handler_test
