@@ -40,7 +40,6 @@ if diff != "":
 	exit(1)
 else:
 	print('SUCCESS!')
-	webserver.kill()
 
 print('TEST 3: Handling multiple requests at a time.')
 
