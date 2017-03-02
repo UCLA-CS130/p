@@ -7,7 +7,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <gtest/gtest_prod.h>
+#include "gtest/gtest_prod.h"
 
 class ProxyHandler : public RequestHandler {
 public:
