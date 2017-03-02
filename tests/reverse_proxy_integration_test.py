@@ -20,7 +20,11 @@ if response != expected:
 	print('Expected: ' + expected)
 	print('Response: ' + response)
 	webserver.kill()
+	proxyserver.kill()
 	exit(1)
 else:
 	print('SUCCESS!')
-	
+
+webserver.kill()
+proxyserver.kill()
+exit(0)
