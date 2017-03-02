@@ -1,5 +1,5 @@
 CC = g++
-FLAGS = -std=c++11 -Wall -Werror -g
+FLAGS = -std=c++11 -Wall -Werror -g -pthread
 GTEST_DIR=googletest/googletest
 TEST_DIR=tests
 
@@ -15,7 +15,7 @@ config_parser_test: config_parser.o
 	ar -rv libgtest.a gtest-all.o
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/config_parser_test.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o config_parser_test
 
-webserver: config_parser.o webserver.o webserver_main.o request.o response.o request_handler.o echo_handler.o static_handler.o not_found_handler.o status_handler.o log.o
+webserver: config_parser.o webserver.o webserver_main.o request.o response.o request_handler.o echo_handler.o static_handler.o not_found_handler.o status_handler.o proxy_handler.o http_client.o log.o
 	$(CC) $(FLAGS) $^ -o webserver -lboost_system -lboost_regex
 
 webserver_test: webserver.o

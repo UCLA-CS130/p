@@ -1,0 +1,11 @@
+
+path / ProxyHandler {
+	host localhost;
+	port 8080;	
+}
+
+default NotFoundHandler {
+	root;
+}
+
+port 8000;
