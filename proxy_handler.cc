@@ -109,8 +109,9 @@ std::string ProxyHandler::request_from_url(const std::string url) {
     ss << "GET" << space_ << parsed.path;
     // include the parameter
     if (parsed.search.length() != 0) {
-        ss << "?" << parsed.search << space_;
+        ss << "?" << parsed.search;
     }
+    ss << space_;
     ss << "HTTP/1.0" << crlf_;
     ss << crlf_;
     std::cout << ss.str() << "\n";
