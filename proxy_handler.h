@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <gtest/gtest_prod.h>
 
 class ProxyHandler : public RequestHandler {
 public:
@@ -30,6 +31,8 @@ private:
 
     static std::string filter_request_header(const Request& req);
     static std::string request_from_url(const std::string url);
+    FRIEND_TEST(ProxyHandlerTest,url_test);
+    FRIEND_TEST(ProxyHandlerTest,filter_test);
 };
 
 REGISTER_REQUEST_HANDLER(ProxyHandler);

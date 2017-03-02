@@ -29,7 +29,11 @@ webserver_test: webserver.o
 integration_test: webserver
 	python3 ${TEST_DIR}/integration_test.py
 
-unit_test_coverage:
+gtest:
+	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c ${GTEST_DIR}/src/gtest-all.cc
+	ar -rv libgtest.a gtest-all.o
+
+unit_test_coverage: 
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c ${GTEST_DIR}/src/gtest-all.cc
 	ar -rv libgtest.a gtest-all.o
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/request_test.cc request.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o request_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
@@ -60,11 +64,8 @@ unit_test_coverage:
 	./proxy_handler_test
 	gcov -r proxy_handler.cc
 
-proxy_handler_test:
-	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/proxy_handler_test.cc webserver.cc config_parser.cc request.cc response.cc request_handler.cc echo_handler.cc static_handler.cc not_found_handler.cc status_handler.cc log.cc proxy_handler.cc http_client.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o proxy_handler_test -lboost_system -lboost_regex  -fprofile-arcs -ftest-coverage
-	./proxy_handler_test
-	gcov -r proxy_handler.cc
+
 clean:
 	rm -rf *.dSYM *.o *.a *.gcno *.gcov *.gcda config_parser webserver *_test
 
-.PHONY: clean run all integration_test unit_test_coverage proxy_handler_test
+.PHONY: clean run all integration_test unit_test_coverage
