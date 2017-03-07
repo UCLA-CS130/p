@@ -70,6 +70,9 @@ deploy:
 	cp -Rp Dockerfile config file deploy
 	docker run --rm httpserver.build tar -cf - webserver | tar -C deploy -xvf -
 
+aws:
+	docker save httpserver | bzip2 | ssh -i docker.pem ec2-user@ec2-35-166-145-87.us-west-2.compute.amazonaws.com 'bunzip2 | docker load'
+
 clean:
 	rm -rf *.dSYM *.o *.a *.gcno *.gcov *.gcda config_parser webserver *_test deploy
 
