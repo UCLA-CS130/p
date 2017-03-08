@@ -1,8 +1,14 @@
 #include "static_handler.h"
 #include "not_found_handler.h"
+#include "markdown.h"
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
+#include <vector>
+#include <string>
+
+#include <boost/optional.hpp>
 
 using namespace std;
 
@@ -34,6 +40,9 @@ StaticHandler::Status StaticHandler::HandleRequest(const Request& request, Respo
         if(ext == "txt"){
             content_type += "plain";
         }
+        else if (ext == "md"){
+            content_type += "html";
+        }
         else{
             content_type += ext;
         }
@@ -59,9 +68,21 @@ StaticHandler::Status StaticHandler::HandleRequest(const Request& request, Respo
         size_t length=ifs.tellg();
         ifs.seekg(0, ios::beg);
 
-		stringstream ss;
-		ss << ifs.rdbuf();	
-		ifs.close();
+        stringstream ss;
+        if (ext == "md"){
+            istream *in=&cin;
+            in=&ifs;
+            
+            markdown::Document doc;
+            doc.read(*in);
+
+            // doc.writeTokens(cout);
+            doc.write(ss);
+
+        }else{
+    		ss << ifs.rdbuf();
+    		ifs.close();
+        }
 
 		response->SetStatus(Response::ResponseCode(200));
 		response->AddHeader("Content-Length", to_string(length));
