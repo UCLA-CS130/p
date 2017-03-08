@@ -75,14 +75,11 @@ StaticHandler::Status StaticHandler::HandleRequest(const Request& request, Respo
             
             markdown::Document doc;
             doc.read(*in);
-
-            // doc.writeTokens(cout);
             doc.write(ss);
-
         }else{
     		ss << ifs.rdbuf();
-    		ifs.close();
         }
+        ifs.close();
 
 		response->SetStatus(Response::ResponseCode(200));
 		response->AddHeader("Content-Length", to_string(length));
