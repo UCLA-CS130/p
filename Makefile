@@ -5,9 +5,12 @@ TEST_DIR=tests
 
 run: webserver
 
-all: webserver configparser configparser_test webserver_test
+all: webserver configparser markdown_parser configparser_test webserver_test
 
 config_parser: config_parser.o config_parser_main.o 
+	$(CC) $(FLAGS) $^ -o $@
+
+markdown_parser: markdown.o markdown-tokens.o 
 	$(CC) $(FLAGS) $^ -o $@
 
 config_parser_test: config_parser.o 
@@ -15,7 +18,7 @@ config_parser_test: config_parser.o
 	ar -rv libgtest.a gtest-all.o
 	$(CC) $(FLAGS) -isystem ${GTEST_DIR}/include -pthread $^ ${TEST_DIR}/config_parser_test.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a -o config_parser_test
 
-webserver: config_parser.o webserver.o webserver_main.o request.o response.o request_handler.o echo_handler.o static_handler.o not_found_handler.o status_handler.o proxy_handler.o http_client.o log.o
+webserver: config_parser.o webserver.o webserver_main.o request.o response.o request_handler.o echo_handler.o static_handler.o not_found_handler.o status_handler.o proxy_handler.o http_client.o log.o markdown.o markdown-tokens.o
 	$(CC) $(FLAGS) $^ -o webserver -lboost_system -lboost_regex
 
 webserver_test: webserver.o
