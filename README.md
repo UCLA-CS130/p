@@ -28,6 +28,7 @@ $ make clean
 Use your browser to view pages: 
 * Echo server: `http://localhost:8080/echo/`
 * Static file server: `http://localhost:8080/static/image0.jpg`
+* Static file server for markdown: `http://localhost:8080/markdown/README.md`
 * Status server: `http://localhost:8080/status/`
 
 ### Source code layout
