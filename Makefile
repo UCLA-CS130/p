@@ -66,9 +66,11 @@ unit_test_coverage:
 	gcov -r proxy_handler.cc
 
 deploy:
-	mkdir deploy
+	docker build -f Dockerfile.build -t httpserver.build .
+	mkdir -p deploy
 	cp -Rp Dockerfile config file deploy
 	docker run --rm httpserver.build tar -cf - webserver | tar -C deploy -xvf -
+	docker build -t httpserver deploy
 
 aws:
 	docker save httpserver | bzip2 | ssh -i docker.pem ec2-user@ec2-35-166-145-87.us-west-2.compute.amazonaws.com 'bunzip2 | docker load'
