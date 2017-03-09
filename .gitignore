@@ -7,3 +7,4 @@ webserver
 .idea
 CMakeLists.txt
 cmake-build-debug/
+docker.pem
