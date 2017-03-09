@@ -9,10 +9,10 @@ webserver = subprocess.Popen(['./webserver', 'config'], stdout=subprocess.DEVNUL
 
 print('TEST 1: Echoing request.')
 print('Sending request...')
-curl_proc = subprocess.Popen("curl -s localhost:8080", stdout=subprocess.PIPE, shell=True)
+curl_proc = subprocess.Popen("curl -s localhost:8080/echo/", stdout=subprocess.PIPE, shell=True)
 
 response = curl_proc.stdout.read().decode('utf-8')
-expected = 'GET / HTTP/1.1\r\nUser-Agent: curl/7.35.0\r\nHost: localhost:8080\r\nAccept: */*\r\n\r\n';
+expected = 'GET /echo/ HTTP/1.1\r\nUser-Agent: curl/7.35.0\r\nHost: localhost:8080\r\nAccept: */*\r\n\r\n';
 
 print('Checking response...')
 if response != expected:
