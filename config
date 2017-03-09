@@ -1,7 +1,7 @@
 port 8080;
 
-path / EchoHandler {
-	root /echo;
+path / ProxyHandler {
+	host www.ucla.edu;	
 }
 
 path /echo EchoHandler {
