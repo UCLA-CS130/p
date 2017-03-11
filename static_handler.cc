@@ -64,22 +64,27 @@ StaticHandler::Status StaticHandler::HandleRequest(const Request& request, Respo
     ifstream ifs;
     ifs.open(filename, ifstream::in);
     if(ifs) {
-        ifs.seekg(0, ios::end);
-        size_t length=ifs.tellg();
-        ifs.seekg(0, ios::beg);
-
         stringstream ss;
+        size_t length;
         if (ext == "md"){
+            ifs.seekg(0, ios::end);
+            ifs.seekg(0, ios::beg);
             istream *in=&cin;
             in=&ifs;
             
             markdown::Document doc;
             doc.read(*in);
+            // doc.writeTokens(cout);
             doc.write(ss);
+            length=ss.str().size();
         }else{
+            ifs.seekg(0, ios::end);
+            length=ifs.tellg();
+            ifs.seekg(0, ios::beg);
+
     		ss << ifs.rdbuf();
+    		ifs.close();
         }
-        ifs.close();
 
 		response->SetStatus(Response::ResponseCode(200));
 		response->AddHeader("Content-Length", to_string(length));
