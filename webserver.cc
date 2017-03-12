@@ -55,12 +55,14 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
             auto it = find_if(headers.begin(), headers.end(), [](const std::pair<string, string>& header) { 
                 return header.first == "Content-Length"; 
             } );
-            if(it != headers.end()) {
+            if(it != headers.end() && it->second != "0") {
+                cout<<"content length is "<<it->second<<endl;
                 async_read(*socket, *read_buffer, transfer_exactly(stoull(it->second)-num_additional_bytes), 
                 [this, socket, read_buffer, &request](const boost::system::error_code& ec, size_t bytes_transferred) {
                     if(!ec) {
 
                         string body((istreambuf_iterator<char>(read_buffer.get())), istreambuf_iterator<char>());
+                        cout<<"body is "<<body<<endl;
                         request->setBody(body);
 
                         do_reply(socket, request);
