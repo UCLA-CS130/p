@@ -20,6 +20,10 @@ path /static2 StaticHandler {
 	root  file/path2;
 }
 
+path /markdown StaticHandler {
+	root  file/markdown;
+}
+
 path /status StatusHandler {
 	root /status;
 }
