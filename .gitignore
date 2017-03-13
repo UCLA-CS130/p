@@ -8,6 +8,3 @@ webserver
 CMakeLists.txt
 cmake-build-debug/
 docker.pem
-server.crt
-server.csr
-server.key
