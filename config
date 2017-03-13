@@ -9,7 +9,7 @@ path /echo EchoHandler {
 }
 
 path /database StaticHandler {
-	root file/database;
+	root bootstrap;
 }
 
 path /static StaticHandler {
