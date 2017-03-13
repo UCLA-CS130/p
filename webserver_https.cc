@@ -1,11 +1,16 @@
-#include "webserver.h"
+#include "webserver_https.h"
 #include <cstring>
 
-WebServer::WebServer(NginxConfig config, unsigned short port, size_t num_threads=4) 
-    : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads)
-    { extract(config); }
+WebServerHTTPS::WebServerHTTPS(NginxConfig config, unsigned short port, size_t num_threads, 
+	const string& cert_file, const string& private_key_file) 
+    : endpoint(ip::tcp::v4(), port), acceptor(m_io_service, endpoint), num_threads(num_threads), context(ssl::context::sslv23)
+    {
+    	extract(config);
+    	context.use_certificate_chain_file(cert_file);
+        context.use_private_key_file(private_key_file, ssl::context::pem);
+    }
 
-void WebServer::run() {
+void WebServerHTTPS::run() {
     do_accept();
 
     //If num_threads>1, start m_io_service.run() in (num_threads-1) threads for thread-pooling
@@ -20,20 +25,26 @@ void WebServer::run() {
     for(thread& t: threads) { t.join(); }
 }
 
-void WebServer::do_accept() {
+void WebServerHTTPS::do_accept() {
     //Create new socket for this connection
     //Shared_ptr is used to pass temporary objects to the asynchronous functions
-    shared_ptr<ip::tcp::socket> socket(new ip::tcp::socket(m_io_service));
+    shared_ptr<ssl::stream<ip::tcp::socket>> socket(new ssl::stream<ip::tcp::socket>(m_io_service, context));
 
-    acceptor.async_accept(*socket, [this, socket](const boost::system::error_code& ec) {
+    acceptor.async_accept((*socket).lowest_layer(), [this, socket](const boost::system::error_code& ec) {
         //Immediately start accepting a new connection
         do_accept();
 
-        if(!ec) { process_request(socket); }
+        if(!ec) {
+            (*socket).async_handshake(ssl::stream_base::server, [this, socket](const boost::system::error_code& ec) {
+                if(!ec) {
+                    process_request(socket);
+                }
+            });
+        }
     });
 }
 
-void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
+void WebServerHTTPS::process_request(shared_ptr<ssl::stream<ip::tcp::socket>> socket) {
     //Create new read_buffer for async_read_until()
     //Shared_ptr is used to pass temporary objects to the asynchronous functions
     shared_ptr<boost::asio::streambuf> read_buffer(new boost::asio::streambuf);
@@ -74,7 +85,7 @@ void WebServer::process_request(shared_ptr<ip::tcp::socket> socket) {
     });
 }
 
-void WebServer::do_reply(shared_ptr<ip::tcp::socket> socket, const unique_ptr<Request> &request) {
+void WebServerHTTPS::do_reply(shared_ptr<ssl::stream<ip::tcp::socket>> socket, const unique_ptr<Request> &request) {
     shared_ptr<boost::asio::streambuf> write_buffer(new boost::asio::streambuf);
     ostream response(write_buffer.get());
 
@@ -156,7 +167,7 @@ void extract_port(NginxConfig config, unsigned short &port) {
   }
 }
 
-void WebServer::extract(NginxConfig config) {
+void WebServerHTTPS::extract(NginxConfig config) {
   // Initialize variables
   string key = "";
   string value = "";

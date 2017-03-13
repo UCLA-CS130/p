@@ -30,6 +30,7 @@ Use your browser to view pages:
 * Static file server: `http://localhost:8080/static/image0.jpg`
 * Static file server for markdown: `http://localhost:8080/markdown/README.md`
 * Status server: `http://localhost:8080/status/`
+* Database interface: `http://localhost:8080/database/index.html`
 
 ### Source code layout
 * `Webserver`: A webserver is responsible for listening to sockets, accepting connections, processing requests, generating responses and replying to client. 

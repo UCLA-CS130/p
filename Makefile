@@ -22,6 +22,9 @@ config_parser_test: config_parser.o
 webserver: config_parser.o webserver.o webserver_main.o request.o response.o request_handler.o echo_handler.o static_handler.o not_found_handler.o status_handler.o proxy_handler.o http_client.o log.o markdown.o markdown-tokens.o
 	$(CC) $(CFLAGS) $^ -o webserver $(LDFLAGS)
 
+webserver_https: config_parser.o webserver_https.o webserver_https_main.o request.o response.o request_handler.o echo_handler.o static_handler.o not_found_handler.o status_handler.o proxy_handler.o http_client.o log.o
+	$(CC) $(CFLAGS) $^ -o webserver_https -lssl -lcrypto -ldl -lz $(LDFLAGS)
+
 webserver_test: webserver.o
 	$(CC) $(CFLAGS) -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c ${GTEST_DIR}/src/gtest-all.cc
 	ar -rv libgtest.a gtest-all.o
@@ -71,14 +74,15 @@ unit_test_coverage:
 deploy:
 	docker build -f Dockerfile.build -t httpserver.build .
 	mkdir -p deploy
-	cp -Rp Dockerfile config file deploy
+	cp -Rp Dockerfile config file bootstrap deploy
 	docker run --rm httpserver.build tar -cf - webserver | tar -C deploy -xvf -
 	docker build -t httpserver deploy
 
 aws:
 	docker save httpserver | bzip2 | ssh -i docker.pem ec2-user@ec2-35-166-145-87.us-west-2.compute.amazonaws.com 'bunzip2 | docker load'
+	ssh -i docker.pem ec2-user@ec2-35-166-145-87.us-west-2.compute.amazonaws.com 'docker run --restart=always -t -p 80:8080 httpserver'
 
 clean:
-	rm -rf *.dSYM *.o *.a *.gcno *.gcov *.gcda config_parser webserver *_test deploy
+	rm -rf *.dSYM *.o *.a *.gcno *.gcov *.gcda config_parser webserver webserver_https *_test deploy
 
 .PHONY: clean run all integration_test unit_test_coverage deploy
