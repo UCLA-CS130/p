@@ -8,6 +8,10 @@ path /echo EchoHandler {
 	root /echo;
 }
 
+path /database StaticHandler {
+	root file/database;
+}
+
 path /static StaticHandler {
 	root  file/path0;
 }
