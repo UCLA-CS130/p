@@ -47,6 +47,11 @@ TEST_F(StaticHandlerTest, TxtFile) {
 	EXPECT_EQ(81, res.ToString().size());
 }
 
+TEST_F(StaticHandlerTest, MarkdownFile) {
+	Response res = GetResponse("README.md");
+	EXPECT_EQ(2138, res.ToString().size());
+}
+
 TEST_F(StaticHandlerTest, AudioFile) {
 	Response res = GetResponse("chengdu.mp3");
 	EXPECT_EQ(8668257, res.ToString().size());
